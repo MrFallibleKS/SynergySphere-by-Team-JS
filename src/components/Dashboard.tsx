@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, ArrowRight, List, Plus, CheckCheck } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -88,17 +88,17 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto max-w-7xl">
+    <div className="p-6">
       {/* Welcome Section */}
       <section className="mb-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
           <div>
-            <h1 className="text-3xl font-bold">Welcome, {currentUser?.name}</h1>
+            <h1 className="text-4xl font-bold">Welcome, {currentUser?.name}</h1>
             <p className="text-gray-600 mt-1">Here's an overview of your tasks and projects</p>
           </div>
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-              <Button className="mt-4 sm:mt-0">
+              <Button className="mt-4 sm:mt-0 px-6 bg-indigo-600 hover:bg-indigo-700">
                 <Plus className="mr-2 h-4 w-4" />
                 New Project
               </Button>
@@ -140,34 +140,25 @@ const Dashboard: React.FC = () => {
       
       {/* Task Overview */}
       <section className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Your Tasks</h2>
+        <h2 className="text-2xl font-bold mb-4">To Do</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* To Do */}
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-lg">To Do</CardTitle>
-                <Badge variant="outline">{todoTasks.length}</Badge>
-              </div>
+          <Card className="border shadow-sm">
+            <CardHeader className="pb-2 bg-white">
+              <CardTitle className="text-xl">To Do</CardTitle>
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 max-h-40 overflow-auto">
+            <CardContent className="pt-4">
+              <ul className="space-y-2">
                 {todoTasks.length > 0 ? (
                   todoTasks.slice(0, 4).map((task) => {
                     const project = getProjectById(task.projectId);
                     
                     return (
-                      <li key={task.id} className="p-2 border rounded-md hover:bg-gray-50">
+                      <li key={task.id} className="p-2 border-b pb-3">
                         <Link to={`/project/${task.projectId}`} className="block">
                           <p className="font-medium">{task.title}</p>
-                          <div className="flex justify-between items-center mt-1">
-                            <span className="text-xs text-gray-500">
-                              {project ? project.name : 'Unknown project'}
-                            </span>
-                            <span className="text-xs text-gray-500 flex items-center">
-                              <Calendar className="h-3 w-3 mr-1" />
-                              {formatDate(task.dueDate)}
-                            </span>
+                          <div className="text-sm text-gray-500 mt-1">
+                            {project ? project.name : 'Unknown project'}
                           </div>
                         </Link>
                       </li>
@@ -178,44 +169,25 @@ const Dashboard: React.FC = () => {
                 )}
               </ul>
             </CardContent>
-            {todoTasks.length > 4 && (
-              <CardFooter>
-                <Button variant="ghost" size="sm" className="w-full" asChild>
-                  <Link to="/tasks">
-                    View all ({todoTasks.length})
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardFooter>
-            )}
           </Card>
           
           {/* In Progress */}
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-lg">In Progress</CardTitle>
-                <Badge variant="secondary">{inProgressTasks.length}</Badge>
-              </div>
+          <Card className="border shadow-sm">
+            <CardHeader className="pb-2 bg-white">
+              <CardTitle className="text-xl">In Progress</CardTitle>
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 max-h-40 overflow-auto">
+            <CardContent className="pt-4">
+              <ul className="space-y-2">
                 {inProgressTasks.length > 0 ? (
                   inProgressTasks.slice(0, 4).map((task) => {
                     const project = getProjectById(task.projectId);
                     
                     return (
-                      <li key={task.id} className="p-2 border rounded-md hover:bg-gray-50">
+                      <li key={task.id} className="p-2 border-b pb-3">
                         <Link to={`/project/${task.projectId}`} className="block">
                           <p className="font-medium">{task.title}</p>
-                          <div className="flex justify-between items-center mt-1">
-                            <span className="text-xs text-gray-500">
-                              {project ? project.name : 'Unknown project'}
-                            </span>
-                            <span className="text-xs text-gray-500 flex items-center">
-                              <Calendar className="h-3 w-3 mr-1" />
-                              {formatDate(task.dueDate)}
-                            </span>
+                          <div className="text-sm text-gray-500 mt-1">
+                            {project ? project.name : 'Unknown project'}
                           </div>
                         </Link>
                       </li>
@@ -226,44 +198,25 @@ const Dashboard: React.FC = () => {
                 )}
               </ul>
             </CardContent>
-            {inProgressTasks.length > 4 && (
-              <CardFooter>
-                <Button variant="ghost" size="sm" className="w-full" asChild>
-                  <Link to="/tasks">
-                    View all ({inProgressTasks.length})
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardFooter>
-            )}
           </Card>
           
           {/* Completed */}
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-lg">Completed</CardTitle>
-                <Badge className="bg-green-600">{completedTasks.length}</Badge>
-              </div>
+          <Card className="border shadow-sm">
+            <CardHeader className="pb-2 bg-white">
+              <CardTitle className="text-xl">Completed</CardTitle>
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 max-h-40 overflow-auto">
+            <CardContent className="pt-4">
+              <ul className="space-y-2">
                 {completedTasks.length > 0 ? (
                   completedTasks.slice(0, 4).map((task) => {
                     const project = getProjectById(task.projectId);
                     
                     return (
-                      <li key={task.id} className="p-2 border rounded-md hover:bg-gray-50">
+                      <li key={task.id} className="p-2 border-b pb-3">
                         <Link to={`/project/${task.projectId}`} className="block">
                           <p className="font-medium line-through text-gray-500">{task.title}</p>
-                          <div className="flex justify-between items-center mt-1">
-                            <span className="text-xs text-gray-500">
-                              {project ? project.name : 'Unknown project'}
-                            </span>
-                            <span className="text-xs text-gray-500 flex items-center">
-                              <CheckCheck className="h-3 w-3 mr-1" />
-                              Completed
-                            </span>
+                          <div className="text-sm text-gray-500 mt-1">
+                            {project ? project.name : 'Unknown project'}
                           </div>
                         </Link>
                       </li>
@@ -274,103 +227,55 @@ const Dashboard: React.FC = () => {
                 )}
               </ul>
             </CardContent>
-            {completedTasks.length > 4 && (
-              <CardFooter>
-                <Button variant="ghost" size="sm" className="w-full" asChild>
-                  <Link to="/tasks">
-                    View all ({completedTasks.length})
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardFooter>
-            )}
           </Card>
         </div>
       </section>
       
-      {/* Attention Required */}
-      {(tasksOverdue.length > 0 || tasksDueSoon.length > 0) && (
-        <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Attention Required</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Overdue Tasks */}
-            {tasksOverdue.length > 0 && (
-              <Card>
-                <CardHeader className="pb-2 bg-red-50 rounded-t-md border-b border-red-100">
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="text-lg text-red-600">Overdue</CardTitle>
-                    <Badge variant="destructive">{tasksOverdue.length}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 mt-2">
-                    {tasksOverdue.map((task) => {
-                      const project = getProjectById(task.projectId);
-                      
-                      return (
-                        <li key={task.id} className="p-2 border border-red-100 rounded-md bg-red-50 hover:bg-red-100">
-                          <Link to={`/project/${task.projectId}`} className="block">
+      {/* Attention Required Section */}
+      <section className="mb-8">
+        <h2 className="text-2xl font-bold mb-4">Attention Required</h2>
+        {tasksDueSoon.length > 0 && (
+          <Card className="border shadow-sm mb-4 bg-amber-50">
+            <CardHeader className="pb-2 border-b border-amber-100">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-lg text-amber-800">Due Soon</CardTitle>
+                <div className="text-amber-600">
+                  <Calendar className="h-5 w-5" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2 mt-2">
+                {tasksDueSoon.map((task) => {
+                  const project = getProjectById(task.projectId);
+                  
+                  return (
+                    <li key={task.id} className="p-2 border-b pb-3">
+                      <Link to={`/project/${task.projectId}`} className="block">
+                        <div className="flex justify-between">
+                          <div>
                             <p className="font-medium">{task.title}</p>
-                            <div className="flex justify-between items-center mt-1">
-                              <span className="text-xs text-gray-700">
-                                {project ? project.name : 'Unknown project'}
-                              </span>
-                              <span className="text-xs text-red-600 font-medium flex items-center">
-                                <Calendar className="h-3 w-3 mr-1" />
-                                Due: {formatDate(task.dueDate)}
-                              </span>
+                            <div className="text-sm text-gray-700 mt-1">
+                              {project ? project.name : 'Unknown project'}
                             </div>
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </CardContent>
-              </Card>
-            )}
-            
-            {/* Due Soon */}
-            {tasksDueSoon.length > 0 && (
-              <Card>
-                <CardHeader className="pb-2 bg-yellow-50 rounded-t-md border-b border-yellow-100">
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="text-lg text-yellow-600">Due Soon</CardTitle>
-                    <Badge className="bg-yellow-500">{tasksDueSoon.length}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 mt-2">
-                    {tasksDueSoon.map((task) => {
-                      const project = getProjectById(task.projectId);
-                      
-                      return (
-                        <li key={task.id} className="p-2 border border-yellow-100 rounded-md bg-yellow-50 hover:bg-yellow-100">
-                          <Link to={`/project/${task.projectId}`} className="block">
-                            <p className="font-medium">{task.title}</p>
-                            <div className="flex justify-between items-center mt-1">
-                              <span className="text-xs text-gray-700">
-                                {project ? project.name : 'Unknown project'}
-                              </span>
-                              <span className="text-xs text-yellow-700 font-medium flex items-center">
-                                <Calendar className="h-3 w-3 mr-1" />
-                                Due: {formatDate(task.dueDate)}
-                              </span>
-                            </div>
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </section>
-      )}
+                          </div>
+                          <div className="text-amber-800 font-medium">
+                            {formatDate(task.dueDate)}
+                          </div>
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
+      </section>
       
-      {/* Recent Projects */}
+      {/* Your Projects Section */}
       <section>
-        <h2 className="text-xl font-semibold mb-4">Your Projects</h2>
+        <h2 className="text-2xl font-bold mb-4">Your Projects</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {userProjects.length > 0 ? (
             userProjects.map((project) => {
@@ -389,12 +294,10 @@ const Dashboard: React.FC = () => {
                 : 0;
               
               return (
-                <Card key={project.id} className="hover:shadow-md transition-shadow">
+                <Card key={project.id} className="border shadow-sm">
                   <CardHeader>
                     <CardTitle>{project.name}</CardTitle>
-                    <CardDescription className="line-clamp-2">
-                      {project.description}
-                    </CardDescription>
+                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">{project.description}</p>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
@@ -403,41 +306,15 @@ const Dashboard: React.FC = () => {
                           <span>Progress</span>
                           <span>{completionPercentage}%</span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
                           <div 
-                            className="bg-synergy-600 h-2.5 rounded-full" 
+                            className="bg-indigo-600 h-2 rounded-full" 
                             style={{ width: `${completionPercentage}%` }}
                           ></div>
                         </div>
                       </div>
-                      <div>
-                        <div className="flex items-center">
-                          <span className="text-sm text-gray-500 mr-2">Team:</span>
-                          <div className="flex -space-x-2">
-                            {members.slice(0, 3).map(member => (
-                              <Avatar key={member.id} className="h-6 w-6 border-2 border-white">
-                                <AvatarImage src={member.avatar} />
-                                <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                              </Avatar>
-                            ))}
-                            {members.length > 3 && (
-                              <div className="h-6 w-6 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-xs text-gray-600">
-                                +{members.length - 3}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
                     </div>
                   </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full" asChild>
-                      <Link to={`/project/${project.id}`}>
-                        <List className="mr-2 h-4 w-4" />
-                        View Project
-                      </Link>
-                    </Button>
-                  </CardFooter>
                 </Card>
               );
             })
