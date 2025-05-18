@@ -2,7 +2,7 @@
 
 ### 🔗 Live Preview
 
-👉 **View the live app here**: [https://synergy-sphere-connect-20.lovable.app](https://synergy-sphere-connect-20.lovable.app)
+👉 **View the live app here**: [https://synergy-sphere-connect-45.lovable.app](https://synergy-sphere-connect-45.lovable.app)
 
 **SynergySphere** is a full-featured, mobile-friendly collaboration platform built to empower teams with streamlined communication, efficient project tracking, and intuitive task management — all in one place.
 
