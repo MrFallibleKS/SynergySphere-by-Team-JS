@@ -1,8 +1,8 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useData } from '@/context/DataContext';
-import { LayoutGrid, Plus } from 'lucide-react';
+import { LayoutGrid, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -22,10 +22,25 @@ import { useIsMobile } from '@/hooks/use-mobile';
 const Sidebar: React.FC = () => {
   const { projects, addProject } = useData();
   const { currentUser } = useAuth();
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [name, setName] = React.useState('');
-  const [description, setDescription] = React.useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const isMobile = useIsMobile();
+
+  // Store sidebar state in localStorage
+  useEffect(() => {
+    const collapsed = localStorage.getItem('sidebar-collapsed');
+    if (collapsed !== null) {
+      setIsCollapsed(collapsed === 'true');
+    }
+  }, []);
+
+  const toggleSidebar = () => {
+    const newState = !isCollapsed;
+    setIsCollapsed(newState);
+    localStorage.setItem('sidebar-collapsed', String(newState));
+  };
 
   const handleCreateProject = () => {
     if (!name.trim()) return;
@@ -47,65 +62,118 @@ const Sidebar: React.FC = () => {
     project => currentUser && project.members.includes(currentUser.id)
   );
 
+  // On mobile devices, the sidebar is hidden by default
+  if (isMobile) {
+    return null;
+  }
+
   return (
-    <div className="w-64 border-r border-gray-200 bg-white h-full flex flex-col">
-      <div className="p-4 flex items-center">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="16" cy="16" r="16" fill="url(#gradient)" />
-              <path d="M22 12L16 7L10 12L10 22L22 22L22 12Z" fill="white" fillOpacity="0.5" />
-              <path d="M16 7L10 12L16 17L22 12L16 7Z" fill="white" />
-              <defs>
-                <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#4776E6" />
-                  <stop offset="1" stopColor="#8E54E9" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-          <h1 className="text-xl font-bold">SynergySphere</h1>
-        </div>
-      </div>
-      
-      <div className="p-4">
-        <div className="flex items-center space-x-2 p-2 bg-gray-100 rounded-md">
-          <LayoutGrid className="h-5 w-5 text-gray-700" />
-          <span className="font-medium">Projects</span>
-        </div>
-        
-        <Button 
-          variant="ghost" 
-          className="w-full justify-start mt-2 text-gray-700" 
-          onClick={() => setIsOpen(true)}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          New Project
-        </Button>
-        
-        <div className="mt-4 space-y-1">
-          {userProjects.map((project) => (
-            <NavLink
-              key={project.id}
-              to={`/project/${project.id}`}
-              className={({ isActive }) => 
-                `flex items-center pl-10 pr-4 py-2 rounded-md ${
-                  isActive 
-                    ? 'bg-indigo-50 text-indigo-700' 
-                    : 'text-gray-700 hover:bg-gray-100'
-                } transition-colors`
-              }
-            >
-              <span className="truncate">{project.name}</span>
-            </NavLink>
-          ))}
-          
-          {userProjects.length === 0 && (
-            <div className="px-3 py-6 text-center text-gray-500">
-              <p>No projects yet</p>
-              <p className="text-sm mt-1">Create your first project</p>
+    <>
+      <div 
+        className={`border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 h-full flex flex-col transition-all duration-300 ease-in-out ${
+          isCollapsed ? 'w-16' : 'w-64'
+        }`}
+      >
+        <div className={`p-4 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+          {!isCollapsed && (
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="16" cy="16" r="16" fill="url(#gradient)" />
+                  <path d="M22 12L16 7L10 12L10 22L22 22L22 12Z" fill="white" fillOpacity="0.5" />
+                  <path d="M16 7L10 12L16 17L22 12L16 7Z" fill="white" />
+                  <defs>
+                    <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#4776E6" />
+                      <stop offset="1" stopColor="#8E54E9" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-500 to-orange-500 bg-clip-text text-transparent">SynergySphere</h1>
             </div>
           )}
+          {isCollapsed && (
+            <div className="w-8 h-8">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="16" fill="url(#gradient)" />
+                <path d="M22 12L16 7L10 12L10 22L22 22L22 12Z" fill="white" fillOpacity="0.5" />
+                <path d="M16 7L10 12L16 17L22 12L16 7Z" fill="white" />
+                <defs>
+                  <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#4776E6" />
+                    <stop offset="1" stopColor="#8E54E9" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+          )}
+        </div>
+        
+        <div className={`p-4 ${isCollapsed ? 'px-2' : ''}`}>
+          <div className={`flex items-center space-x-2 p-2 bg-gray-100 dark:bg-gray-700 rounded-md ${
+            isCollapsed ? 'justify-center' : ''
+          }`}>
+            <LayoutGrid className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+            {!isCollapsed && <span className="font-medium">Projects</span>}
+          </div>
+          
+          <Button 
+            variant="ghost" 
+            className={`w-full justify-start mt-2 text-gray-700 dark:text-gray-300 ${
+              isCollapsed ? 'px-0 justify-center' : ''
+            }`}
+            onClick={() => setIsOpen(true)}
+          >
+            <Plus className={`${isCollapsed ? '' : 'mr-2'} h-4 w-4`} />
+            {!isCollapsed && 'New Project'}
+          </Button>
+          
+          <div className="mt-4 space-y-1">
+            {userProjects.map((project) => (
+              <NavLink
+                key={project.id}
+                to={`/project/${project.id}`}
+                className={({ isActive }) => 
+                  `flex items-center ${isCollapsed ? 'justify-center px-2' : 'pl-10 pr-4'} py-2 rounded-md ${
+                    isActive 
+                      ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300' 
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  } transition-colors`
+                }
+              >
+                {isCollapsed ? (
+                  <span className="w-6 h-6 flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs">
+                    {project.name.charAt(0)}
+                  </span>
+                ) : (
+                  <span className="truncate">{project.name}</span>
+                )}
+              </NavLink>
+            ))}
+            
+            {userProjects.length === 0 && !isCollapsed && (
+              <div className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
+                <p>No projects yet</p>
+                <p className="text-sm mt-1">Create your first project</p>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Toggle button */}
+        <div className="mt-auto p-4 flex justify-center">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={toggleSidebar}
+            className="rounded-full h-8 w-8 transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            {isCollapsed ? 
+              <ChevronRight className="h-4 w-4" /> : 
+              <ChevronLeft className="h-4 w-4" />
+            }
+          </Button>
         </div>
       </div>
       
@@ -143,7 +211,7 @@ const Sidebar: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
 

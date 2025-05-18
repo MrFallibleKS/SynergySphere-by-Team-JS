@@ -66,6 +66,32 @@ export default {
 					900: '#4c1d95',
 					950: '#2e1065',
 				},
+				'synergy-blue': {
+					50: '#eef6ff',
+					100: '#daeeff',
+					200: '#bee0ff',
+					300: '#91ccff',
+					400: '#5eafff',
+					500: '#3b91ff',
+					600: '#2472ff',
+					700: '#1959ff',
+					800: '#1a48d2',
+					900: '#1c40a8',
+					950: '#17275f',
+				},
+				'synergy-orange': {
+					50: '#fff8ed',
+					100: '#ffefd5',
+					200: '#ffdcaa',
+					300: '#ffc473',
+					400: '#ffa13c',
+					500: '#ff8514',
+					600: '#ff6a06',
+					700: '#cc5000',
+					800: '#a13e06',
+					900: '#823509',
+					950: '#461a03',
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -111,12 +137,22 @@ export default {
 						transform: "translateY(10px)"
 					}
 				},
+				"rotate": {
+					"0%": { transform: "rotate(0deg)" },
+					"100%": { transform: "rotate(360deg)" }
+				},
+				"pulse-scale": {
+					"0%, 100%": { transform: "scale(1)" },
+					"50%": { transform: "scale(1.05)" }
+				}
 			},
 			animation: {
 				"accordion-down": "accordion-down 0.2s ease-out",
 				"accordion-up": "accordion-up 0.2s ease-out",
 				"fade-in": "fade-in 0.3s ease-out",
 				"fade-out": "fade-out 0.3s ease-out",
+				"rotate": "rotate 1s linear infinite",
+				"pulse-scale": "pulse-scale 2s ease-in-out infinite"
 			},
 		}
 	},
