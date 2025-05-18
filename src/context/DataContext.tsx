@@ -1,7 +1,7 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Project, Task, User, Comment, Notification } from '@/types';
 import { useToast } from '@/components/ui/use-toast';
-import { cn } from '@/lib/utils';
 
 // Simple UUID generator for demo purposes
 const generateId = () => {
@@ -26,9 +26,12 @@ interface DataContextType {
   getTaskById: (id: string) => Task | undefined;
   getTasksByProject: (projectId: string) => Task[];
   getTasksByAssignee: (userId: string) => Task[];
+  getAvailableTasks: () => Task[];
   addTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => string;
   updateTask: (task: Partial<Task> & { id: string }) => void;
   deleteTask: (id: string) => void;
+  assignTask: (taskId: string, userId: string) => void;
+  unassignTask: (taskId: string) => void;
   
   // User functions
   getUserById: (id: string) => User | undefined;
@@ -91,6 +94,7 @@ const initialProjects: Project[] = [
     imageBanner: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1200&h=400&q=80',
     managerName: 'John Doe',
     managerContact: 'john@example.com',
+    tags: ['UI/UX', 'Web Design', 'Front-end'],
     members: ['1', '2'],
     tasks: ['t1', 't2'],
     createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
@@ -103,6 +107,7 @@ const initialProjects: Project[] = [
     imageBanner: 'https://images.unsplash.com/photo-1481487196290-c152efe083f5?auto=format&fit=crop&w=1200&h=400&q=80',
     managerName: 'Jane Smith',
     managerContact: 'jane@example.com',
+    tags: ['Mobile', 'React Native', 'UI Design'],
     members: ['1', '2', '3'],
     tasks: ['t3', 't4'],
     createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
@@ -118,6 +123,8 @@ const initialTasks: Task[] = [
     assigneeId: '1',
     projectId: 'p1',
     status: 'IN_PROGRESS',
+    priority: 'HIGH',
+    role: 'UI Designer',
     dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
     createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date().toISOString()
@@ -129,6 +136,8 @@ const initialTasks: Task[] = [
     assigneeId: '2',
     projectId: 'p1',
     status: 'DONE',
+    priority: 'MEDIUM',
+    role: 'Content Strategist',
     dueDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date().toISOString()
@@ -140,6 +149,8 @@ const initialTasks: Task[] = [
     assigneeId: '1',
     projectId: 'p2',
     status: 'TODO',
+    priority: 'HIGH',
+    role: 'Backend Developer',
     dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date().toISOString()
@@ -148,9 +159,11 @@ const initialTasks: Task[] = [
     id: 't4',
     title: 'UI Design for Mobile',
     description: 'Create UI mockups for the mobile application',
-    assigneeId: '3',
+    assigneeId: '', // Unassigned task
     projectId: 'p2',
-    status: 'IN_PROGRESS',
+    status: 'TODO',
+    priority: 'MEDIUM',
+    role: 'UI Designer',
     dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
     createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date().toISOString()
@@ -182,6 +195,14 @@ const initialNotifications: Notification[] = [
     userId: '2',
     read: true,
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'n4',
+    type: 'TASK_AVAILABLE',
+    referenceId: 't4',
+    userId: '3',
+    read: false,
+    createdAt: new Date().toISOString()
   }
 ];
 
@@ -267,12 +288,55 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
 
   const addProject = (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = new Date().toISOString();
+    const newProjectId = generateId().slice(0, 8);
+    
+    // Process any tasks included with the project
+    const projectTasks: string[] = [];
+    
+    if (project.taskDetails && project.taskDetails.length > 0) {
+      // Add each task
+      project.taskDetails.forEach(taskData => {
+        const taskId = `t${tasks.length + projectTasks.length + 1}`;
+        projectTasks.push(taskId);
+        
+        // Add the task
+        const newTask: Task = {
+          id: taskId,
+          title: taskData.title,
+          description: taskData.description || '',
+          assigneeId: taskData.assigneeId || '',
+          dueDate: taskData.dueDate,
+          status: taskData.status || 'TODO',
+          priority: taskData.priority || 'MEDIUM',
+          role: taskData.role || '',
+          projectId: newProjectId,
+          createdAt: now,
+          updatedAt: now
+        };
+        
+        setTasks(prev => [...prev, newTask]);
+        
+        // Create notification for unassigned task
+        if (!newTask.assigneeId) {
+          addNotification({
+            type: 'TASK_AVAILABLE',
+            referenceId: taskId,
+            userId: project.members[0], // Notify project creator
+            read: false,
+          });
+        }
+      });
+    }
+    
     const newProject: Project = {
       ...project,
-      id: generateId().slice(0, 8),
+      id: newProjectId,
+      tasks: projectTasks,
       createdAt: now,
       updatedAt: now
     };
+    
+    delete (newProject as any).taskDetails; // Remove the taskDetails as they're now in tasks
     
     setProjects(prev => [...prev, newProject]);
     toast({
@@ -284,6 +348,57 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const updateProject = (projectUpdate: Partial<Project> & { id: string }) => {
+    // Process any tasks included with the project update
+    if (projectUpdate.taskDetails && projectUpdate.taskDetails.length > 0) {
+      const existingTaskIds = tasks
+        .filter(t => t.projectId === projectUpdate.id)
+        .map(t => t.id);
+        
+      // Check which tasks are new vs updates
+      projectUpdate.taskDetails.forEach(taskData => {
+        if (taskData.id && existingTaskIds.includes(taskData.id)) {
+          // Update existing task
+          updateTask({
+            id: taskData.id,
+            title: taskData.title,
+            description: taskData.description,
+            assigneeId: taskData.assigneeId,
+            dueDate: taskData.dueDate,
+            status: taskData.status,
+            priority: taskData.priority,
+            role: taskData.role
+          });
+        } else {
+          // Add new task
+          const now = new Date().toISOString();
+          const taskId = addTask({
+            title: taskData.title,
+            description: taskData.description || '',
+            assigneeId: taskData.assigneeId || '',
+            dueDate: taskData.dueDate,
+            status: taskData.status || 'TODO',
+            priority: taskData.priority || 'MEDIUM',
+            role: taskData.role || '',
+            projectId: projectUpdate.id,
+          });
+          
+          // Update the project's tasks array
+          setProjects(prev => prev.map(p => {
+            if (p.id === projectUpdate.id) {
+              return {
+                ...p,
+                tasks: [...p.tasks, taskId]
+              };
+            }
+            return p;
+          }));
+        }
+      });
+      
+      // We've handled the tasks separately
+      delete (projectUpdate as any).taskDetails;
+    }
+    
     setProjects(prev => prev.map(project => {
       if (project.id === projectUpdate.id) {
         return {
@@ -333,6 +448,10 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   const getTasksByAssignee = (userId: string) => {
     return tasks.filter(task => task.assigneeId === userId);
   };
+  
+  const getAvailableTasks = () => {
+    return tasks.filter(task => task.assigneeId === '' && task.status !== 'DONE');
+  };
 
   const addTask = (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = new Date().toISOString();
@@ -357,6 +476,22 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       return project;
     }));
     
+    // Create notification for unassigned task
+    if (!task.assigneeId) {
+      // Find project members to notify about available task
+      const project = projects.find(p => p.id === task.projectId);
+      if (project && project.members.length > 0) {
+        project.members.forEach(memberId => {
+          addNotification({
+            type: 'TASK_AVAILABLE',
+            referenceId: newTask.id,
+            userId: memberId,
+            read: false,
+          });
+        });
+      }
+    }
+    
     toast({
       title: "Task created",
       description: `${newTask.title} has been added to the project`
@@ -366,6 +501,21 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const updateTask = (taskUpdate: Partial<Task> & { id: string }) => {
+    const task = tasks.find(t => t.id === taskUpdate.id);
+    
+    // Check if the assignee changed
+    if (task && taskUpdate.assigneeId !== undefined && taskUpdate.assigneeId !== task.assigneeId) {
+      if (taskUpdate.assigneeId) {
+        // Task assigned to someone
+        addNotification({
+          type: 'TASK_ASSIGNED',
+          referenceId: task.id,
+          userId: taskUpdate.assigneeId,
+          read: false,
+        });
+      }
+    }
+    
     setTasks(prev => prev.map(task => {
       if (task.id === taskUpdate.id) {
         return {
@@ -406,6 +556,54 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       toast({
         title: "Task deleted",
         description: `${taskToDelete.title} has been removed`
+      });
+    }
+  };
+  
+  const assignTask = (taskId: string, userId: string) => {
+    const task = tasks.find(task => task.id === taskId);
+    if (task) {
+      updateTask({
+        id: taskId,
+        assigneeId: userId,
+        status: 'IN_PROGRESS'
+      });
+      
+      toast({
+        title: "Task assigned",
+        description: `You've taken up the task "${task.title}"`
+      });
+    }
+  };
+  
+  const unassignTask = (taskId: string) => {
+    const task = tasks.find(task => task.id === taskId);
+    if (task) {
+      const previousAssignee = task.assigneeId;
+      
+      updateTask({
+        id: taskId,
+        assigneeId: ''
+      });
+      
+      // Notify project members about available task
+      const project = projects.find(p => p.id === task.projectId);
+      if (project) {
+        project.members.forEach(memberId => {
+          if (memberId !== previousAssignee) {
+            addNotification({
+              type: 'TASK_AVAILABLE',
+              referenceId: taskId,
+              userId: memberId,
+              read: false,
+            });
+          }
+        });
+      }
+      
+      toast({
+        title: "Task unassigned",
+        description: `You've withdrawn from the task "${task.title}"`
       });
     }
   };
@@ -499,6 +697,18 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       }
       return project;
     }));
+    
+    // Unassign any tasks assigned to this user in the project
+    setTasks(prev => prev.map(task => {
+      if (task.projectId === projectId && task.assigneeId === userId) {
+        return {
+          ...task,
+          assigneeId: '',
+          updatedAt: new Date().toISOString()
+        };
+      }
+      return task;
+    }));
   };
 
   // User functions
@@ -519,9 +729,12 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     getTaskById,
     getTasksByProject,
     getTasksByAssignee,
+    getAvailableTasks,
     addTask,
     updateTask,
     deleteTask,
+    assignTask,
+    unassignTask,
     getUserById,
     getCommentsByTask,
     addComment,

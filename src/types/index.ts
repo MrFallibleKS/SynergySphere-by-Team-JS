@@ -16,6 +16,8 @@ export type Task = {
   dueDate: string;
   status: Status;
   projectId: string;
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH';
+  role?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -35,15 +37,17 @@ export type Project = {
   imageBanner?: string;
   managerName?: string;
   managerContact?: string;
+  tags?: string[];
   members: string[]; // User IDs
   tasks: string[]; // Task IDs
+  taskDetails?: Task[]; // Full task objects for form handling
   createdAt: string;
   updatedAt: string;
 };
 
 export type Notification = {
   id: string;
-  type: 'TASK_ASSIGNED' | 'TASK_DUE_SOON' | 'TASK_OVERDUE' | 'COMMENT_ADDED' | 'PROJECT_UPDATED';
+  type: 'TASK_ASSIGNED' | 'TASK_DUE_SOON' | 'TASK_OVERDUE' | 'COMMENT_ADDED' | 'PROJECT_UPDATED' | 'TASK_AVAILABLE';
   referenceId: string; // ID of the related task, project, etc.
   userId: string;
   read: boolean;

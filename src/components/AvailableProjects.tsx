@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, UserPlus, User } from 'lucide-react';
+import { Users, UserPlus, User, Tag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -59,12 +59,46 @@ const AvailableProjects = () => {
             <CardDescription className="line-clamp-2 mt-2">
               {project.description}
             </CardDescription>
+            
+            {/* Project tags */}
+            {project.tags && project.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {project.tags.map((tag, index) => (
+                  <Badge key={index} variant="secondary" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </CardHeader>
           <CardContent className="flex-grow">
             {project.managerName && (
               <div className="flex items-center text-sm mb-2">
                 <User className="h-4 w-4 mr-2 text-gray-500" />
                 <span>Manager: {project.managerName}</span>
+              </div>
+            )}
+            
+            {/* Show tasks that need assignment */}
+            {project.taskDetails && project.taskDetails.filter(t => !t.assigneeId).length > 0 && (
+              <div className="mt-3">
+                <h4 className="text-sm font-medium mb-1 flex items-center gap-1">
+                  <Tag className="h-3 w-3" />
+                  Available Tasks:
+                </h4>
+                <div className="space-y-1">
+                  {project.taskDetails.filter(t => !t.assigneeId).slice(0, 2).map((task, idx) => (
+                    <div key={idx} className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded text-xs">
+                      <div className="font-medium">{task.title}</div>
+                      <div className="text-gray-500">Role: {task.role}</div>
+                    </div>
+                  ))}
+                  {project.taskDetails.filter(t => !t.assigneeId).length > 2 && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      +{project.taskDetails.filter(t => !t.assigneeId).length - 2} more roles
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </CardContent>

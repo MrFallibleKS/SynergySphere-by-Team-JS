@@ -21,6 +21,10 @@ const TaskStatusLegend = () => {
         <div className="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
         <span className="text-xs text-gray-600 dark:text-gray-300">Terminated</span>
       </div>
+      <div className="flex items-center">
+        <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+        <span className="text-xs text-gray-600 dark:text-gray-300">Available for Assignment</span>
+      </div>
     </div>
   );
 };
