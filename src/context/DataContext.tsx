@@ -1,31 +1,48 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Project, Task, User, Comment } from '@/types';
+import { Project, Task, User, Comment, Notification } from '@/types';
 import { useToast } from '@/components/ui/use-toast';
-import { v4 as uuidv4 } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+
+// Simple UUID generator for demo purposes
+const generateId = () => {
+  return Math.random().toString(36).substring(2, 15) + 
+         Math.random().toString(36).substring(2, 15);
+};
 
 interface DataContextType {
   projects: Project[];
   tasks: Task[];
   users: User[];
   comments: Comment[];
+  notifications: Notification[];
   
   // Project functions
   getProjectById: (id: string) => Project | undefined;
-  addProject: (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateProject: (id: string, project: Partial<Project>) => void;
+  addProject: (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => string;
+  updateProject: (project: Partial<Project> & { id: string }) => void;
   deleteProject: (id: string) => void;
   
   // Task functions
   getTaskById: (id: string) => Task | undefined;
   getTasksByProject: (projectId: string) => Task[];
   getTasksByAssignee: (userId: string) => Task[];
-  addTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateTask: (id: string, task: Partial<Task>) => void;
+  addTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => string;
+  updateTask: (task: Partial<Task> & { id: string }) => void;
   deleteTask: (id: string) => void;
   
   // User functions
   getUserById: (id: string) => User | undefined;
+  
+  // Comment functions
+  getCommentsByTask: (taskId: string) => Comment[];
+  addComment: (comment: Omit<Comment, 'id' | 'createdAt'>) => string;
+  
+  // Notification functions
+  markNotificationAsRead: (id: string) => void;
+  
+  // Team management functions
+  addUserToProject: (projectId: string, userId: string) => void;
+  removeUserFromProject: (projectId: string, userId: string) => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -140,17 +157,66 @@ const initialTasks: Task[] = [
   }
 ];
 
+// Initial notifications
+const initialNotifications: Notification[] = [
+  {
+    id: 'n1',
+    type: 'TASK_ASSIGNED',
+    referenceId: 't1',
+    userId: '1',
+    read: false,
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'n2',
+    type: 'COMMENT_ADDED',
+    referenceId: 't2',
+    userId: '1',
+    read: false,
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'n3',
+    type: 'TASK_DUE_SOON',
+    referenceId: 't3',
+    userId: '2',
+    read: true,
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+  }
+];
+
+// Initial comments
+const initialComments: Comment[] = [
+  {
+    id: 'c1',
+    content: 'I started working on this, should be done by tomorrow.',
+    authorId: '1',
+    taskId: 't1',
+    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'c2',
+    content: 'Do you need any help with this task?',
+    authorId: '2',
+    taskId: 't1',
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+  }
+];
+
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [users] = useState<User[]>(initialUsers);
-  const [comments] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<Comment[]>(initialComments);
+  const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
   const { toast } = useToast();
 
   useEffect(() => {
     // Load data from localStorage or use initial data
     const savedProjects = localStorage.getItem('projects');
     const savedTasks = localStorage.getItem('tasks');
+    const savedComments = localStorage.getItem('comments');
+    const savedNotifications = localStorage.getItem('notifications');
     
     if (savedProjects) {
       setProjects(JSON.parse(savedProjects));
@@ -163,6 +229,18 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     } else {
       setTasks(initialTasks);
     }
+    
+    if (savedComments) {
+      setComments(JSON.parse(savedComments));
+    } else {
+      setComments(initialComments);
+    }
+    
+    if (savedNotifications) {
+      setNotifications(JSON.parse(savedNotifications));
+    } else {
+      setNotifications(initialNotifications);
+    }
   }, []);
 
   // Save data to localStorage when it changes
@@ -174,6 +252,14 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.setItem('tasks', JSON.stringify(tasks));
   }, [tasks]);
 
+  useEffect(() => {
+    localStorage.setItem('comments', JSON.stringify(comments));
+  }, [comments]);
+
+  useEffect(() => {
+    localStorage.setItem('notifications', JSON.stringify(notifications));
+  }, [notifications]);
+
   // Project functions
   const getProjectById = (id: string) => {
     return projects.find(project => project.id === id);
@@ -183,7 +269,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     const now = new Date().toISOString();
     const newProject: Project = {
       ...project,
-      id: uuidv4().slice(0, 8),
+      id: generateId().slice(0, 8),
       createdAt: now,
       updatedAt: now
     };
@@ -197,12 +283,12 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     return newProject.id;
   };
 
-  const updateProject = (id: string, projectUpdates: Partial<Project>) => {
+  const updateProject = (projectUpdate: Partial<Project> & { id: string }) => {
     setProjects(prev => prev.map(project => {
-      if (project.id === id) {
+      if (project.id === projectUpdate.id) {
         return {
           ...project,
-          ...projectUpdates,
+          ...projectUpdate,
           updatedAt: new Date().toISOString()
         };
       }
@@ -279,12 +365,12 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     return newTask.id;
   };
 
-  const updateTask = (id: string, taskUpdates: Partial<Task>) => {
+  const updateTask = (taskUpdate: Partial<Task> & { id: string }) => {
     setTasks(prev => prev.map(task => {
-      if (task.id === id) {
+      if (task.id === taskUpdate.id) {
         return {
           ...task,
-          ...taskUpdates,
+          ...taskUpdate,
           updatedAt: new Date().toISOString()
         };
       }
@@ -324,6 +410,97 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // Comment functions
+  const getCommentsByTask = (taskId: string) => {
+    return comments.filter(comment => comment.taskId === taskId);
+  };
+
+  const addComment = (comment: Omit<Comment, 'id' | 'createdAt'>) => {
+    const now = new Date().toISOString();
+    const newComment: Comment = {
+      ...comment,
+      id: `c${comments.length + 1}`,
+      createdAt: now,
+    };
+    
+    setComments(prev => [...prev, newComment]);
+    
+    // Create notification for comment
+    if (comment.authorId) {
+      const task = tasks.find(t => t.id === comment.taskId);
+      if (task && task.assigneeId !== comment.authorId) {
+        addNotification({
+          type: 'COMMENT_ADDED',
+          referenceId: comment.taskId,
+          userId: task.assigneeId,
+          read: false,
+        });
+      }
+    }
+    
+    return newComment.id;
+  };
+
+  // Notification functions
+  const addNotification = (notification: Omit<Notification, 'id' | 'createdAt'>) => {
+    const now = new Date().toISOString();
+    const newNotification: Notification = {
+      ...notification,
+      id: `n${notifications.length + 1}`,
+      createdAt: now,
+    };
+    
+    setNotifications(prev => [...prev, newNotification]);
+    return newNotification.id;
+  };
+
+  const markNotificationAsRead = (id: string) => {
+    setNotifications(prev => prev.map(notification => {
+      if (notification.id === id) {
+        return {
+          ...notification,
+          read: true,
+        };
+      }
+      return notification;
+    }));
+  };
+
+  // Team management functions
+  const addUserToProject = (projectId: string, userId: string) => {
+    setProjects(prev => prev.map(project => {
+      if (project.id === projectId && !project.members.includes(userId)) {
+        toast({
+          title: "Team updated",
+          description: `${users.find(u => u.id === userId)?.name} has been added to the project`
+        });
+        return {
+          ...project,
+          members: [...project.members, userId],
+          updatedAt: new Date().toISOString()
+        };
+      }
+      return project;
+    }));
+  };
+
+  const removeUserFromProject = (projectId: string, userId: string) => {
+    setProjects(prev => prev.map(project => {
+      if (project.id === projectId && project.members.includes(userId)) {
+        toast({
+          title: "Team updated",
+          description: `${users.find(u => u.id === userId)?.name} has been removed from the project`
+        });
+        return {
+          ...project,
+          members: project.members.filter(id => id !== userId),
+          updatedAt: new Date().toISOString()
+        };
+      }
+      return project;
+    }));
+  };
+
   // User functions
   const getUserById = (id: string) => {
     return users.find(user => user.id === id);
@@ -334,6 +511,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     tasks,
     users,
     comments,
+    notifications,
     getProjectById,
     addProject,
     updateProject,
@@ -344,7 +522,12 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     addTask,
     updateTask,
     deleteTask,
-    getUserById
+    getUserById,
+    getCommentsByTask,
+    addComment,
+    markNotificationAsRead,
+    addUserToProject,
+    removeUserFromProject
   };
 
   return (

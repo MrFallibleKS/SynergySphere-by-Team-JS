@@ -61,7 +61,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ taskId, onClose, onDelete }) =>
     }
     
     updateTask({
-      ...task,
+      id: task.id,
       title: editTitle,
       description: editDescription,
       assigneeId: editAssigneeId,

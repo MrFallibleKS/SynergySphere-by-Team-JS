@@ -112,7 +112,7 @@ const ProjectDetails: React.FC = () => {
     }
     
     updateProject({
-      ...project,
+      id: project.id,
       name: editName,
       description: editDescription,
     });
@@ -180,7 +180,7 @@ const ProjectDetails: React.FC = () => {
   // Update task status
   const handleUpdateTaskStatus = (task: Task, newStatus: Status) => {
     updateTask({
-      ...task,
+      id: task.id,
       status: newStatus,
     });
   };
