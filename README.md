@@ -16,7 +16,9 @@ Developed during a high-intensity hackathon by **Team JS** 🧠⚡
 - Create, edit, and delete projects
 - Assign project managers
 - Set deadlines, priority levels, and tags
-- Upload images and write rich descriptions
+- Upload images and write rich descriptions and many more.
+
+- 
 
 ### ✅ Task Management
 - Create tasks linked to specific projects
