@@ -1,12 +1,9 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, ArrowRight, LayoutGrid, Users, Clock, MessageSquare } from 'lucide-react';
-
 const LandingPage: React.FC = () => {
-  return (
-    <div className="bg-white dark:bg-gray-900 min-h-screen text-gray-900 dark:text-white transition-colors">
+  return <div className="bg-white dark:bg-gray-900 min-h-screen text-gray-900 dark:text-white transition-colors">
       {/* Navigation */}
       <header className="border-b border-gray-200 dark:border-gray-800">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -22,7 +19,7 @@ const LandingPage: React.FC = () => {
             <div className="hidden md:flex items-center space-x-6">
               <a href="#features" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition">Features</a>
               <a href="#testimonials" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition">Testimonials</a>
-              <a href="#pricing" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition">Pricing</a>
+              
               <a href="#faq" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition">FAQ</a>
             </div>
             <div className="flex items-center space-x-4">
@@ -66,11 +63,7 @@ const LandingPage: React.FC = () => {
               <div className="relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur-lg opacity-30"></div>
                 <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-                  <img 
-                    src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1200&h=600&q=80" 
-                    alt="SynergySphere Dashboard" 
-                    className="w-full h-auto"
-                  />
+                  <img src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1200&h=600&q=80" alt="SynergySphere Dashboard" className="w-full h-auto" />
                 </div>
               </div>
             </div>
@@ -79,7 +72,7 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-16 bg-gray-50 dark:bg-gray-800 transition-colors">
+      <section id="features" className="bg-gray-50 dark:bg-gray-800 transition-colors py-[54px]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Everything Your Team Needs</h2>
@@ -132,9 +125,7 @@ const LandingPage: React.FC = () => {
           
           <div className="mt-12 text-center">
             <Link to="/register">
-              <Button size="lg">
-                Get Started Today <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              
             </Link>
           </div>
         </div>
@@ -155,9 +146,7 @@ const LandingPage: React.FC = () => {
                 </Button>
               </Link>
               <Link to="/login">
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-                  Login
-                </Button>
+                
               </Link>
             </div>
           </div>
@@ -220,8 +209,6 @@ const LandingPage: React.FC = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default LandingPage;
