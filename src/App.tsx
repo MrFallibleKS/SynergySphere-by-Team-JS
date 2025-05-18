@@ -16,6 +16,8 @@ import ProjectDetails from "./components/ProjectDetails";
 import Tasks from "./pages/Tasks";
 import NotFound from "./pages/NotFound";
 import { useAuth } from "./context/AuthContext";
+import ProjectFormPage from "./pages/ProjectFormPage";
+import TaskFormPage from "./pages/TaskFormPage";
 
 const queryClient = new QueryClient();
 
@@ -50,7 +52,16 @@ const AppRoutes = () => {
       <Route path="/" element={<Index />} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/project/:projectId" element={<ProtectedRoute><ProjectDetails /></ProtectedRoute>} />
+      <Route path="/projects" element={<ProtectedRoute><Index /></ProtectedRoute>} />
       <Route path="/tasks" element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
+      
+      {/* New form routes */}
+      <Route path="/projects/new" element={<ProtectedRoute><ProjectFormPage /></ProtectedRoute>} />
+      <Route path="/projects/edit/:projectId" element={<ProtectedRoute><ProjectFormPage /></ProtectedRoute>} />
+      <Route path="/tasks/new" element={<ProtectedRoute><TaskFormPage /></ProtectedRoute>} />
+      <Route path="/project/:projectId/tasks/new" element={<ProtectedRoute><TaskFormPage /></ProtectedRoute>} />
+      <Route path="/tasks/edit/:taskId" element={<ProtectedRoute><TaskFormPage /></ProtectedRoute>} />
+      
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

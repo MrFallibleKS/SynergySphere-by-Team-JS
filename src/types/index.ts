@@ -18,6 +18,7 @@ export type Task = {
   projectId: string;
   priority?: 'LOW' | 'MEDIUM' | 'HIGH';
   role?: string;
+  tags?: string[];
   createdAt: string;
   updatedAt: string;
 };
@@ -51,25 +52,31 @@ export type Project = {
   imageBanner?: string;
   managerName?: string;
   managerContact?: string;
+  managerId?: string;
   tags?: string[];
   members: string[]; // User IDs
   tasks: string[]; // Task IDs
   taskDetails?: TaskFormData[]; // Changed from Task[] to TaskFormData[] for form handling
+  deadline?: string;
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH';
   createdAt: string;
   updatedAt: string;
 };
 
-// Adding ProjectFormData type that was missing
+// Adding ProjectFormData type for form handling
 export type ProjectFormData = {
   name: string;
   description: string;
   imageBanner?: string;
   managerName?: string;
   managerContact?: string;
+  managerId?: string;
   tags?: string[];
   members: string[];
   tasks: string[];
   taskDetails?: TaskFormData[];
+  deadline?: string;
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH';
 };
 
 export type Notification = {

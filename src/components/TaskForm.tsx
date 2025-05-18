@@ -1,18 +1,18 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
-import { Project, User } from '@/types';
-import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/components/ui/use-toast';
-import { ChevronLeft, Calendar as CalendarIcon, Tags } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Calendar } from './ui/calendar';
 import { format } from 'date-fns';
+import { TaskFormData, User, Project } from '@/types';
+import { useAuth } from '@/context/AuthContext';
+import { useData } from '@/context/DataContext';
+import { useToast } from '@/components/ui/use-toast';
 import {
   Select,
   SelectContent,
@@ -25,39 +25,51 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { ChevronLeft, Calendar as CalendarIcon, Tags } from 'lucide-react';
 
-interface ProjectFormProps {
-  onSubmit: (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => void;
+interface TaskFormProps {
+  onSubmit: (task: TaskFormData) => void;
   onCancel: () => void;
-  initialData?: Partial<Project>;
+  initialData?: Partial<TaskFormData>;
   isEditing?: boolean;
-  users?: { id: string; name: string }[];
+  users?: User[];
+  projects?: Project[];
+  preSelectedProjectId?: string;
 }
 
-const ProjectForm: React.FC<ProjectFormProps> = ({
+const TaskForm: React.FC<TaskFormProps> = ({
   onSubmit,
   onCancel,
   initialData = {},
   isEditing = false,
-  users = []
+  users = [],
+  projects = [],
+  preSelectedProjectId,
 }) => {
-  const [name, setName] = useState(initialData.name || '');
+  const [title, setTitle] = useState(initialData.title || '');
   const [description, setDescription] = useState(initialData.description || '');
-  const [imageBanner, setImageBanner] = useState(initialData.imageBanner || '');
-  const [managerName, setManagerName] = useState(initialData.managerName || '');
-  const [managerContact, setManagerContact] = useState(initialData.managerContact || '');
-  const [tags, setTags] = useState<string[]>(initialData.tags || []);
-  const [tagInput, setTagInput] = useState('');
-  const [deadline, setDeadline] = useState<Date | undefined>(
-    initialData.deadline ? new Date(initialData.deadline) : undefined
+  const [assigneeId, setAssigneeId] = useState(initialData.assigneeId || '');
+  const [projectId, setProjectId] = useState(preSelectedProjectId || initialData.projectId || '');
+  const [date, setDate] = useState<Date | undefined>(
+    initialData.dueDate ? new Date(initialData.dueDate) : undefined
   );
   const [priority, setPriority] = useState(initialData.priority || 'MEDIUM');
+  const [role, setRole] = useState(initialData.role || '');
+  const [tags, setTags] = useState<string[]>(initialData.tags || []);
+  const [tagInput, setTagInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [managerId, setManagerId] = useState(initialData.managerId || '');
-
+  
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const { toast } = useToast();
+  const { projectId: urlProjectId } = useParams();
+
+  // If we have a project ID from the URL, use it
+  useEffect(() => {
+    if (urlProjectId && !projectId) {
+      setProjectId(urlProjectId);
+    }
+  }, [urlProjectId, projectId]);
 
   const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTagInput(e.target.value);
@@ -89,19 +101,28 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name.trim()) {
+    if (!title.trim()) {
       toast({
         title: "Error",
-        description: "Project name is required",
+        description: "Task title is required",
         variant: "destructive"
       });
       return;
     }
     
-    if (!deadline) {
+    if (!date) {
       toast({
         title: "Error",
-        description: "Project deadline is required",
+        description: "Deadline is required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!projectId) {
+      toast({
+        title: "Error",
+        description: "Project is required",
         variant: "destructive"
       });
       return;
@@ -109,24 +130,24 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     
     setIsSubmitting(true);
     
-    const projectData = {
-      name,
+    const taskData: TaskFormData = {
+      id: initialData.id,
+      title,
       description,
-      imageBanner,
-      managerName,
-      managerContact,
-      tags,
-      members: initialData.members || (currentUser ? [currentUser.id] : []),
-      tasks: initialData.tasks || [],
-      taskDetails: initialData.taskDetails || [],
-      deadline: deadline.toISOString(),
-      priority,
-      managerId
+      assigneeId,
+      dueDate: date.toISOString(),
+      status: initialData.status || 'TODO',
+      priority: priority as 'LOW' | 'MEDIUM' | 'HIGH',
+      role,
+      projectId,
+      tags
     };
     
-    onSubmit(projectData);
+    onSubmit(taskData);
     setIsSubmitting(false);
   };
+
+  const selectedProject = projects.find(p => p.id === projectId);
 
   return (
     <Card className="p-6 w-full max-w-4xl mx-auto">
@@ -135,42 +156,47 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
           variant="ghost" 
           size="sm" 
           className="flex items-center mr-2"
-          onClick={() => navigate('/projects')}
+          onClick={() => navigate(projectId ? `/project/${projectId}` : '/projects')}
         >
           <ChevronLeft size={16} className="mr-1" />
           Back
         </Button>
         <h2 className="text-2xl font-semibold">
-          {isEditing ? 'Edit Project' : 'New Project'}
+          {isEditing ? 'Edit Task' : 'New Task'}
+          {selectedProject && (
+            <span className="text-muted-foreground ml-2 text-lg font-normal">
+              {`in ${selectedProject.name}`}
+            </span>
+          )}
         </h2>
       </div>
-      
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <div>
-            <Label htmlFor="project-name" className="text-base">Project Name*</Label>
+            <Label htmlFor="task-name" className="text-base">Task Name*</Label>
             <Input
-              id="project-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter project name"
+              id="task-name"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter task name"
               className="mt-1"
               required
             />
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="project-manager" className="text-base">Project Manager</Label>
+              <Label htmlFor="task-assignee" className="text-base">Assignee</Label>
               <Select 
-                value={managerId} 
-                onValueChange={setManagerId}
+                value={assigneeId} 
+                onValueChange={setAssigneeId}
               >
                 <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Select manager" />
+                  <SelectValue placeholder="Select assignee" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="">Unassigned</SelectItem>
                   {users.map(user => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.name}
@@ -179,9 +205,31 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div>
-              <Label htmlFor="project-deadline" className="text-base flex items-center">
+              <Label htmlFor="task-project" className="text-base">Project*</Label>
+              <Select 
+                value={projectId} 
+                onValueChange={setProjectId}
+                disabled={!!preSelectedProjectId || !!urlProjectId}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select project" />
+                </SelectTrigger>
+                <SelectContent>
+                  {projects.map(project => (
+                    <SelectItem key={project.id} value={project.id}>
+                      {project.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="task-deadline" className="text-base flex items-center">
                 <CalendarIcon size={16} className="mr-2" />
                 Deadline*
               </Label>
@@ -191,22 +239,33 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                     variant="outline"
                     className="w-full justify-start text-left mt-1"
                   >
-                    {deadline ? format(deadline, "PPP") : <span>Pick a date</span>}
+                    {date ? format(date, "PPP") : <span>Pick a date</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={deadline}
-                    onSelect={setDeadline}
+                    selected={date}
+                    onSelect={setDate}
                     initialFocus
                     className="p-3 pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
             </div>
+
+            <div>
+              <Label htmlFor="task-role" className="text-base">Role/Skill Required</Label>
+              <Input
+                id="task-role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                placeholder="Required skill/role for this task"
+                className="mt-1"
+              />
+            </div>
           </div>
-          
+
           <div>
             <Label className="text-base mb-1 flex items-center">
               <Tags size={16} className="mr-2" />
@@ -245,60 +304,36 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
               </div>
             )}
           </div>
-          
+
           <div>
-            <Label htmlFor="project-priority" className="text-base">Priority</Label>
+            <Label htmlFor="task-priority" className="text-base">Priority</Label>
             <RadioGroup 
               value={priority} 
               onValueChange={setPriority}
               className="flex space-x-4 mt-1"
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="LOW" id="r1" />
-                <Label htmlFor="r1" className="cursor-pointer">Low</Label>
+                <RadioGroupItem value="LOW" id="priority-low" />
+                <Label htmlFor="priority-low" className="cursor-pointer">Low</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="MEDIUM" id="r2" />
-                <Label htmlFor="r2" className="cursor-pointer">Medium</Label>
+                <RadioGroupItem value="MEDIUM" id="priority-medium" />
+                <Label htmlFor="priority-medium" className="cursor-pointer">Medium</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="HIGH" id="r3" />
-                <Label htmlFor="r3" className="cursor-pointer">High</Label>
+                <RadioGroupItem value="HIGH" id="priority-high" />
+                <Label htmlFor="priority-high" className="cursor-pointer">High</Label>
               </div>
             </RadioGroup>
           </div>
-          
+
           <div>
-            <Label htmlFor="project-image" className="text-base">Banner Image URL</Label>
-            <Input
-              id="project-image"
-              value={imageBanner}
-              onChange={(e) => setImageBanner(e.target.value)}
-              placeholder="Enter banner image URL"
-              className="mt-1"
-            />
-            {imageBanner && (
-              <div className="mt-2 rounded-md overflow-hidden h-32 bg-gray-100 flex items-center justify-center">
-                <img 
-                  src={imageBanner} 
-                  alt="Banner Preview" 
-                  className="object-cover h-full w-full"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = 'https://via.placeholder.com/400x200?text=Invalid+Image+URL';
-                  }}
-                />
-              </div>
-            )}
-          </div>
-          
-          <div>
-            <Label htmlFor="project-description" className="text-base">Description</Label>
+            <Label htmlFor="task-description" className="text-base">Description</Label>
             <Textarea
-              id="project-description"
+              id="task-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe the project"
+              placeholder="Describe the task"
               rows={4}
               className="mt-1"
             />
@@ -310,7 +345,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
             Discard
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : isEditing ? 'Update Project' : 'Save Project'}
+            {isSubmitting ? 'Saving...' : isEditing ? 'Update Task' : 'Save Task'}
           </Button>
         </div>
       </form>
@@ -318,4 +353,4 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
   );
 };
 
-export default ProjectForm;
+export default TaskForm;
