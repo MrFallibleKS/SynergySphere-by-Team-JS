@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Bell, Menu, User, LogOut, X, Sun, Moon } from 'lucide-react';
+import { Bell, Menu, User, LogOut, X, Sun, Moon, LayoutGrid } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useData } from '@/context/DataContext';
 import { Link } from 'react-router-dom';

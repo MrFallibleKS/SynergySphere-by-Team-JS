@@ -15,8 +15,9 @@ const AuthPage: React.FC = () => {
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
   const [activeTab, setActiveTab] = useState('login');
+  const [isLoading, setIsLoading] = useState(false);
   
-  const { login, register, isLoading, isAuthenticated } = useAuth();
+  const { login, register, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   
   // Redirect if already authenticated
@@ -28,12 +29,26 @@ const AuthPage: React.FC = () => {
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(loginEmail, loginPassword);
+    setIsLoading(true);
+    try {
+      await login(loginEmail, loginPassword);
+    } catch (error) {
+      console.error("Login failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    await register(registerName, registerEmail, registerPassword);
+    setIsLoading(true);
+    try {
+      await register(registerName, registerEmail, registerPassword);
+    } catch (error) {
+      console.error("Registration failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

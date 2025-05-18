@@ -1,9 +1,5 @@
 
-// Let's make the necessary modifications to the AuthContext to support logout redirection
-// I can only see this file in the list of read-only files, so I'll write a full implementation
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 type User = {
   id: string;
@@ -48,13 +44,11 @@ const mockUsers = [
   }
 ];
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+// The key issue is here - we need to move the useNavigate hook inside the component
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
-  
-  // Initialize navigate for redirects
-  const navigate = useNavigate();
   
   useEffect(() => {
     // Check for saved user in localStorage
@@ -91,8 +85,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCurrentUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('currentUser');
-    // Redirect to landing page on logout
-    navigate('/landing');
+    // Instead of using navigate directly, we let the component that uses this function handle navigation
+    // This is because navigate should be used inside a component, not here
+    // The Index.tsx component should handle redirection after logout
   };
 
   const register = async (name: string, email: string, password: string) => {
