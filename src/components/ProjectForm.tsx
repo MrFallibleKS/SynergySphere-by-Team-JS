@@ -220,7 +220,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
             <Label htmlFor="project-priority" className="text-base">Priority</Label>
             <RadioGroup 
               value={priority} 
-              onValueChange={setPriority}
+              onValueChange={(value: 'LOW' | 'MEDIUM' | 'HIGH') => setPriority(value)}
               className="flex space-x-4 mt-1"
             >
               <div className="flex items-center space-x-2">

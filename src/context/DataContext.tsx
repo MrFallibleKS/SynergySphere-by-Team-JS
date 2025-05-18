@@ -1,7 +1,6 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Project, User, Notification, Task, TaskFormData } from '@/types';
+import { Project, User, Notification, Task, TaskFormData, Comment } from '@/types';
 import { useAuth } from './AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { useLocalStorage } from '@/hooks/use-local-storage';
@@ -11,6 +10,7 @@ interface DataContextType {
   projects: Project[];
   users: User[];
   notifications: Notification[];
+  tasks: TaskFormData[]; // Add tasks to the context
   addProject: (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateProject: (project: Project) => void;
   deleteProject: (projectId: string) => void;
@@ -20,6 +20,13 @@ interface DataContextType {
   markNotificationAsRead: (notificationId: string) => void;
   getTasksByAssignee: (userId: string) => TaskFormData[];
   getProjectById: (projectId: string) => Project | undefined;
+  getTasksByProject: (projectId: string) => TaskFormData[];
+  getTaskById: (taskId: string) => TaskFormData | undefined;
+  getUserById: (userId: string) => User | undefined;
+  addUserToProject: (projectId: string, userId: string) => void;
+  removeUserFromProject: (projectId: string, userId: string) => void;
+  addComment: (comment: Omit<Comment, 'id' | 'createdAt'>) => void;
+  getCommentsByTask: (taskId: string) => Comment[];
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -28,6 +35,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [projects, setProjects] = useLocalStorage<Project[]>('projects', []);
   const [users, setUsers] = useLocalStorage<User[]>('users', []);
   const [notifications, setNotifications] = useLocalStorage<Notification[]>('notifications', []);
+  const [comments, setComments] = useLocalStorage<Comment[]>('comments', []);
   const { currentUser } = useAuth();
   const { toast } = useToast();
   const { generateSeedData } = useSeedData();
@@ -40,6 +48,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       setProjects(seedData.projects);
     }
   }, [projects.length, users.length, generateSeedData, setUsers, setProjects]);
+
+  // Derived property - all tasks across all projects
+  const tasks = projects.flatMap(project => 
+    project.taskDetails || []
+  );
 
   const addProject = (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = new Date().toISOString();
@@ -209,12 +222,93 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     return projects.find(project => project.id === projectId);
   };
 
+  // Add these new helper methods
+  
+  // Get tasks by project ID
+  const getTasksByProject = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    return project?.taskDetails || [];
+  };
+  
+  // Get task by ID
+  const getTaskById = (taskId: string) => {
+    return tasks.find(task => task.id === taskId);
+  };
+  
+  // Get user by ID
+  const getUserById = (userId: string) => {
+    return users.find(user => user.id === userId);
+  };
+  
+  // Add user to project
+  const addUserToProject = (projectId: string, userId: string) => {
+    setProjects(projects.map(project => {
+      if (project.id === projectId && !project.members.includes(userId)) {
+        return {
+          ...project,
+          members: [...project.members, userId],
+          updatedAt: new Date().toISOString()
+        };
+      }
+      return project;
+    }));
+  };
+  
+  // Remove user from project
+  const removeUserFromProject = (projectId: string, userId: string) => {
+    setProjects(projects.map(project => {
+      if (project.id === projectId) {
+        return {
+          ...project,
+          members: project.members.filter(id => id !== userId),
+          updatedAt: new Date().toISOString()
+        };
+      }
+      return project;
+    }));
+  };
+
+  // Add comment to a task
+  const addComment = (comment: Omit<Comment, 'id' | 'createdAt'>) => {
+    const newComment: Comment = {
+      ...comment,
+      id: uuidv4(),
+      createdAt: new Date().toISOString()
+    };
+    
+    setComments([...comments, newComment]);
+    
+    // Add notification for comment
+    if (currentUser) {
+      // Find task to get assignee
+      const task = getTaskById(comment.taskId);
+      
+      if (task && task.assigneeId && task.assigneeId !== currentUser.id) {
+        const notification: Notification = {
+          id: uuidv4(),
+          type: 'COMMENT_ADDED',
+          referenceId: comment.taskId,
+          userId: task.assigneeId,
+          read: false,
+          createdAt: new Date().toISOString()
+        };
+        setNotifications([...notifications, notification]);
+      }
+    }
+  };
+  
+  // Get comments for a task
+  const getCommentsByTask = (taskId: string) => {
+    return comments.filter(comment => comment.taskId === taskId);
+  };
+
   return (
     <DataContext.Provider
       value={{
         projects,
         users,
         notifications,
+        tasks,
         addProject,
         updateProject,
         deleteProject,
@@ -223,7 +317,14 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         deleteTask,
         markNotificationAsRead,
         getTasksByAssignee,
-        getProjectById
+        getProjectById,
+        getTasksByProject,
+        getTaskById,
+        getUserById,
+        addUserToProject,
+        removeUserFromProject,
+        addComment,
+        getCommentsByTask
       }}
     >
       {children}
