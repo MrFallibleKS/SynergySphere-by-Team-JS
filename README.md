@@ -44,12 +44,17 @@ Includes:
 
 - **Frontend:** React, Tailwind CSS, TypeScript
 - **Backend:** Node.js, Express.js, MongoDB
-- **Authentication:** JWT, bcrypt (planned, two demo accounts are given for now)
+- **Authentication:** JWT, bcrypt
+- **Real-time:** Socket.IO *(planned)*
 - **Dev Tools:** Vite, GitHub, Visual Studio Code
 
 ---
 
 ## 🚀 Getting Started
+
+### 🔗 Live Preview
+
+👉 **View the live app here**: [https://synergy-sphere-connect-20.vercel.app](https://synergy-sphere-connect-20.vercel.app)
 
 ### 1. Clone the repo
 
