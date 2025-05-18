@@ -59,6 +59,19 @@ export type Project = {
   updatedAt: string;
 };
 
+// Adding ProjectFormData type that was missing
+export type ProjectFormData = {
+  name: string;
+  description: string;
+  imageBanner?: string;
+  managerName?: string;
+  managerContact?: string;
+  tags?: string[];
+  members: string[];
+  tasks: string[];
+  taskDetails?: TaskFormData[];
+};
+
 export type Notification = {
   id: string;
   type: 'TASK_ASSIGNED' | 'TASK_DUE_SOON' | 'TASK_OVERDUE' | 'COMMENT_ADDED' | 'PROJECT_UPDATED' | 'TASK_AVAILABLE';
