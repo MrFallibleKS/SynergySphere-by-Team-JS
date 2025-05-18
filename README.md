@@ -1,5 +1,9 @@
 # 🚀 SynergySphere – Advanced Team Collaboration Platform
 
+### 🔗 Live Preview
+
+👉 **View the live app here**: [https://synergy-sphere-connect-20.vercel.app](https://synergy-sphere-connect-20.lovable.app)
+
 **SynergySphere** is a full-featured, mobile-friendly collaboration platform built to empower teams with streamlined communication, efficient project tracking, and intuitive task management — all in one place.
 
 Developed during a high-intensity hackathon by **Team JS** 🧠⚡
@@ -52,12 +56,28 @@ Includes:
 
 ## 🚀 Getting Started
 
-### 🔗 Live Preview
 
-👉 **View the live app here**: [https://synergy-sphere-connect-20.vercel.app](https://synergy-sphere-connect-20.vercel.app)
 
-### 1. Clone the repo
 
+git clone https://github.com/MrFallibleKS/SynergySphere-by-Team-JS.git
+cd SynergySphere-by-Team-JS
+
+# 1. Clone the repo
 ```bash
 git clone https://github.com/MrFallibleKS/SynergySphere-by-Team-JS.git
 cd SynergySphere-by-Team-JS
+```
+# 2. Install dependencies
+```bash
+npm install
+```
+
+# 3. Run the development server
+```bash
+npm run dev
+```
+# 5. Open the app in your browser (usually at)
+```bash
+ http://localhost:3000
+```
+
