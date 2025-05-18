@@ -5,8 +5,8 @@ import ProjectForm from '@/components/ProjectForm';
 import { useData } from '@/context/DataContext';
 import { v4 as uuidv4 } from 'uuid';
 import { useToast } from '@/components/ui/use-toast';
+import { Project } from '@/types';
 import { ChevronLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 const ProjectFormPage: React.FC = () => {
   const { projectId } = useParams();
@@ -19,7 +19,7 @@ const ProjectFormPage: React.FC = () => {
     ? projects.find(p => p.id === projectId) 
     : undefined;
 
-  const handleSubmit = (projectData: any) => {
+  const handleSubmit = (projectData: Partial<Project>) => {
     try {
       if (isEditing && project) {
         updateProject({
@@ -36,7 +36,11 @@ const ProjectFormPage: React.FC = () => {
           id: uuidv4(),
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-        };
+          // Ensure all required Project properties are present
+          members: projectData.members || [],
+          tasks: projectData.tasks || [],
+        } as Project;
+        
         addProject(newProject);
         toast({
           title: "Success",

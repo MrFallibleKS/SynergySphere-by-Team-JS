@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -86,8 +87,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     
     setIsSubmitting(true);
     
-    const projectData = {
-      ...initialData,
+    const projectData: Partial<Project> = {
       name,
       description,
       managerId,
@@ -96,7 +96,8 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       deadline: deadline ? deadline.toISOString() : '',
       priority,
       tags,
-      members,
+      members: members || [],
+      tasks: initialData?.tasks || [],
       imageBanner
     };
     
@@ -220,7 +221,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
             <Label htmlFor="project-priority" className="text-base">Priority</Label>
             <RadioGroup 
               value={priority} 
-              onValueChange={(value: 'LOW' | 'MEDIUM' | 'HIGH') => setPriority(value)}
+              onValueChange={(value) => setPriority(value as 'LOW' | 'MEDIUM' | 'HIGH')}
               className="flex space-x-4 mt-1"
             >
               <div className="flex items-center space-x-2">

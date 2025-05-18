@@ -17,9 +17,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { Status } from '@/types';
 
 interface TaskDetailProps {
   taskId: string;
@@ -48,7 +48,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ taskId, onClose, onDelete }) =>
   const [editDescription, setEditDescription] = useState(task.description);
   const [editAssigneeId, setEditAssigneeId] = useState(task.assigneeId);
   const [editDueDate, setEditDueDate] = useState(new Date(task.dueDate).toISOString().split('T')[0]);
-  const [editStatus, setEditStatus] = useState(task.status);
+  const [editStatus, setEditStatus] = useState<Status>(task.status);
   
   // Comment state
   const [newComment, setNewComment] = useState('');
@@ -61,12 +61,15 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ taskId, onClose, onDelete }) =>
     }
     
     updateTask({
+      ...task, // Keep all existing task properties
       id: task.id,
       title: editTitle,
       description: editDescription,
       assigneeId: editAssigneeId,
       dueDate: new Date(editDueDate).toISOString(),
       status: editStatus,
+      priority: task.priority,
+      role: task.role,
     });
     
     setIsEditing(false);
@@ -96,6 +99,9 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ taskId, onClose, onDelete }) =>
     const date = new Date(dateString);
     return format(date, 'MMM dd, h:mm a');
   };
+
+  // Use createdAt from task, or current date if not available
+  const createdAtDate = task.createdAt || new Date().toISOString();
 
   return (
     <>
@@ -231,7 +237,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ taskId, onClose, onDelete }) =>
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-2">Status</h3>
               {isEditing ? (
-                <Select value={editStatus} onValueChange={(value: any) => setEditStatus(value)}>
+                <Select value={editStatus} onValueChange={(value: Status) => setEditStatus(value)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -258,7 +264,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({ taskId, onClose, onDelete }) =>
               <h3 className="text-sm font-medium text-gray-500 mb-2">Created</h3>
               <div className="flex items-center text-sm">
                 <Clock className="h-4 w-4 mr-2" />
-                <span>{formatDate(task.createdAt)}</span>
+                <span>{formatDate(createdAtDate)}</span>
               </div>
             </div>
           </div>
