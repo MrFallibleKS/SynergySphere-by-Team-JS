@@ -13,10 +13,20 @@ const Index: React.FC = () => {
   
   // Listen for authentication changes and redirect accordingly
   useEffect(() => {
-    if (!isAuthenticated && location.pathname !== '/landing') {
-      navigate('/landing', { replace: true });
+    if (isAuthenticated) {
+      if (location.pathname === '/landing') {
+        navigate('/', { replace: true });
+      }
+    } else {
+      if (location.pathname !== '/landing') {
+        navigate('/landing', { replace: true });
+      }
     }
   }, [isAuthenticated, navigate, location.pathname]);
+  
+  if (location.pathname === '/login' || location.pathname === '/register') {
+    return <AuthPage />;
+  }
   
   if (!isAuthenticated) {
     return <LandingPage />;

@@ -10,6 +10,7 @@ import { ThemeProvider } from "./hooks/use-theme";
 import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import LandingPage from "./pages/LandingPage";
+import AuthPage from "./pages/AuthPage";
 import Profile from "./pages/Profile";
 import ProjectDetails from "./components/ProjectDetails";
 import Tasks from "./pages/Tasks";
@@ -44,6 +45,8 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/landing" element={<PublicRoute><LandingPage /></PublicRoute>} />
+      <Route path="/login" element={<PublicRoute><AuthPage /></PublicRoute>} />
+      <Route path="/register" element={<PublicRoute><AuthPage /></PublicRoute>} />
       <Route path="/" element={<Index />} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/project/:projectId" element={<ProtectedRoute><ProjectDetails /></ProtectedRoute>} />

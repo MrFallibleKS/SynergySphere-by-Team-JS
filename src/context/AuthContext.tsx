@@ -41,10 +41,23 @@ const mockUsers = [
     email: 'jane@example.com',
     password: 'password123',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jane'
+  },
+  {
+    id: '3',
+    name: 'Demo User 1',
+    email: 'abc@gmail.com',
+    password: 'password123',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Demo1'
+  },
+  {
+    id: '4',
+    name: 'Demo User 2',
+    email: 'xyz@gmail.com',
+    password: 'password123',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Demo2'
   }
 ];
 
-// The key issue is here - we need to move the useNavigate hook inside the component
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -85,9 +98,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setCurrentUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('currentUser');
-    // Instead of using navigate directly, we let the component that uses this function handle navigation
-    // This is because navigate should be used inside a component, not here
-    // The Index.tsx component should handle redirection after logout
   };
 
   const register = async (name: string, email: string, password: string) => {

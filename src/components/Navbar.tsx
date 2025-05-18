@@ -1,210 +1,265 @@
+
 import React, { useState } from 'react';
-import { Bell, Menu, User, LogOut, X, Sun, Moon, LayoutGrid } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
-import { useData } from '@/context/DataContext';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { 
-  Drawer,
-  DrawerContent,
-  DrawerTrigger,
-} from '@/components/ui/drawer';
+import {
+  Bell,
+  ChevronDown,
+  LogOut,
+  Menu,
+  Moon,
+  Settings,
+  Sun,
+  User,
+} from 'lucide-react';
 import { useTheme } from '@/hooks/use-theme';
-import Sidebar from './Sidebar';
-import MobileNotifications from './MobileNotifications';
+import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
+import { Badge } from "@/components/ui/badge";
+import { useToast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar: React.FC = () => {
-  const { currentUser, logout } = useAuth();
-  const { notifications, markNotificationAsRead } = useData();
-  const { theme, toggleTheme } = useTheme();
+  const { currentUser, logout, isAuthenticated } = useAuth();
+  const { theme, setTheme } = useTheme();
   const isMobile = useIsMobile();
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  // Get unread notifications for the current user
-  const unreadNotifications = notifications.filter(
-    n => n.userId === currentUser?.id && !n.read
-  );
-
-  return (
-    <header className="bg-white dark:bg-gray-800 shadow-sm z-10 transition-colors duration-200">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  
+  const handleThemeToggle = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+  
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Logged out successfully",
+      description: "You have been logged out of your account",
+    });
+    navigate('/landing');
+  };
+  
+  // Show a simplified navbar for non-authenticated users on pages like landing
+  if (!isAuthenticated) {
+    return (
+      <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center">
-            {isMobile ? (
-              <Drawer open={sidebarOpen} onOpenChange={setSidebarOpen}>
-                <DrawerTrigger asChild>
-                  <Button variant="ghost" size="icon" className="mr-2">
-                    <Menu className="h-5 w-5" />
-                  </Button>
-                </DrawerTrigger>
-                <DrawerContent className="h-[80%]">
-                  <div className="p-4">
-                    <div className="flex justify-between items-center mb-4">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8">
-                          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="16" cy="16" r="16" fill="url(#gradient)" />
-                            <path d="M22 12L16 7L10 12L10 22L22 22L22 12Z" fill="white" fillOpacity="0.5" />
-                            <path d="M16 7L10 12L16 17L22 12L16 7Z" fill="white" />
-                            <defs>
-                              <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                                <stop stopColor="#4776E6" />
-                                <stop offset="1" stopColor="#8E54E9" />
-                              </linearGradient>
-                            </defs>
-                          </svg>
-                        </div>
-                        <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-500 to-orange-500 bg-clip-text text-transparent">
-                          SynergySphere
-                        </h1>
-                      </div>
-                      <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)}>
-                        <X className="h-5 w-5" />
-                      </Button>
-                    </div>
-                    <div className="py-2 px-2">
-                      <div className="flex items-center space-x-2 p-2 bg-gray-100 dark:bg-gray-700 rounded-md mb-4">
-                        <LayoutGrid className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-                        <span className="font-medium">Projects</span>
-                      </div>
-                      {/* Mobile navigation items will go here */}
-                    </div>
-                  </div>
-                </DrawerContent>
-              </Drawer>
-            ) : null}
             <Link to="/" className="flex items-center">
-              <div className="w-8 h-8 mr-2">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="16" cy="16" r="16" fill="url(#gradient)" />
-                  <path d="M22 12L16 7L10 12L10 22L22 22L22 12Z" fill="white" fillOpacity="0.5" />
-                  <path d="M16 7L10 12L16 17L22 12L16 7Z" fill="white" />
-                  <defs>
-                    <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#4776E6" />
-                      <stop offset="1" stopColor="#8E54E9" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-500 to-orange-500 bg-clip-text text-transparent">SynergySphere</span>
+              <img src="/lovable-uploads/13d60c81-dde3-4f3d-a4ee-6c5bc6231383.png" alt="SynergySphere Logo" className="h-8 w-auto mr-2" />
+              <span className="font-bold text-xl bg-gradient-to-r from-blue-600 via-purple-500 to-orange-500 bg-clip-text text-transparent hidden sm:inline">
+                SynergySphere
+              </span>
             </Link>
           </div>
           
-          <div className="flex items-center gap-4">
-            {/* Notifications */}
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleThemeToggle}
+              className="rounded-full"
+            >
+              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
             {isMobile ? (
-              <Drawer>
-                <DrawerTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative">
-                    <Bell className="h-5 w-5" />
-                    {unreadNotifications.length > 0 && (
-                      <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
-                        {unreadNotifications.length}
-                      </span>
-                    )}
+              <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <Menu className="h-5 w-5" />
                   </Button>
-                </DrawerTrigger>
-                <DrawerContent className="h-[60%]">
-                  <div className="p-4">
-                    <MobileNotifications />
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[250px] sm:w-[300px]">
+                  <div className="flex flex-col h-full">
+                    <div className="flex-1 py-4">
+                      <ul className="space-y-2">
+                        <li>
+                          <Button variant="ghost" className="w-full justify-start" asChild>
+                            <Link to="/login">Login</Link>
+                          </Button>
+                        </li>
+                        <li>
+                          <Button variant="ghost" className="w-full justify-start" asChild>
+                            <Link to="/register">Register</Link>
+                          </Button>
+                        </li>
+                      </ul>
+                    </div>
+                    <Button variant="default" className="w-full" asChild>
+                      <Link to="/register">Get Started</Link>
+                    </Button>
                   </div>
-                </DrawerContent>
-              </Drawer>
+                </SheetContent>
+              </Sheet>
             ) : (
-              <DropdownMenu open={notificationsOpen} onOpenChange={setNotificationsOpen}>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative">
-                    <Bell className="h-5 w-5" />
-                    {unreadNotifications.length > 0 && (
-                      <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
-                        {unreadNotifications.length}
-                      </span>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-80">
-                  <DropdownMenuLabel className="flex items-center justify-between">
-                    Notifications
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <div className="max-h-64 overflow-y-auto">
-                    {unreadNotifications.length > 0 ? (
-                      unreadNotifications.map(notification => (
-                        <DropdownMenuItem key={notification.id} className="cursor-pointer" onSelect={() => markNotificationAsRead(notification.id)}>
-                          <div className="flex flex-col">
-                            <span className="font-medium">
-                              {notification.type === 'TASK_ASSIGNED' && 'New Task Assigned'}
-                              {notification.type === 'COMMENT_ADDED' && 'New Comment'}
-                              {notification.type === 'TASK_DUE_SOON' && 'Task Due Soon'}
-                            </span>
-                            <span className="text-sm text-gray-500 dark:text-gray-400">
-                              {new Date(notification.createdAt).toLocaleString()}
-                            </span>
-                          </div>
-                        </DropdownMenuItem>
-                      ))
-                    ) : (
-                      <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-                        No new notifications
-                      </div>
-                    )}
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-
-            {/* User Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={currentUser?.avatar} alt={currentUser?.name} />
-                    <AvatarFallback>{currentUser?.name?.charAt(0)}</AvatarFallback>
-                  </Avatar>
+              <>
+                <Button variant="ghost" asChild>
+                  <Link to="/login">Login</Link>
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <Link to="/profile">
-                  <DropdownMenuItem>
-                    <User className="mr-2 h-4 w-4" />
-                    Profile
-                  </DropdownMenuItem>
-                </Link>
-                <DropdownMenuItem onClick={toggleTheme}>
-                  {theme === 'dark' ? (
-                    <>
-                      <Sun className="mr-2 h-4 w-4" />
-                      Light Mode
-                    </>
-                  ) : (
-                    <>
-                      <Moon className="mr-2 h-4 w-4" />
-                      Dark Mode
-                    </>
-                  )}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <Button variant="default" asChild>
+                  <Link to="/register">Get Started</Link>
+                </Button>
+              </>
+            )}
           </div>
+        </div>
+      </header>
+    );
+  }
+  
+  // Show full navbar for authenticated users
+  return (
+    <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 sticky top-0 z-10">
+      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center">
+          <div className="flex md:hidden">
+            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="mr-2"
+                >
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[250px] sm:w-[300px]">
+                <div className="flex flex-col h-full">
+                  <Link to="/" className="flex items-center py-4">
+                    <img src="/lovable-uploads/13d60c81-dde3-4f3d-a4ee-6c5bc6231383.png" alt="SynergySphere Logo" className="h-8 w-auto mr-2" />
+                    <span className="font-bold text-xl bg-gradient-to-r from-blue-600 via-purple-500 to-orange-500 bg-clip-text text-transparent">
+                      SynergySphere
+                    </span>
+                  </Link>
+                  <div className="flex-1 py-4">
+                    <ul className="space-y-2">
+                      <li>
+                        <Button variant="ghost" className="w-full justify-start" asChild>
+                          <Link to="/">Dashboard</Link>
+                        </Button>
+                      </li>
+                      <li>
+                        <Button variant="ghost" className="w-full justify-start" asChild>
+                          <Link to="/tasks">Tasks</Link>
+                        </Button>
+                      </li>
+                      <li>
+                        <Button variant="ghost" className="w-full justify-start" asChild>
+                          <Link to="/profile">Profile</Link>
+                        </Button>
+                      </li>
+                    </ul>
+                  </div>
+                  <Button variant="outline" className="w-full" onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+          
+          <Link to="/" className="flex items-center">
+            <img src="/lovable-uploads/13d60c81-dde3-4f3d-a4ee-6c5bc6231383.png" alt="SynergySphere Logo" className="h-8 w-auto mr-2" />
+            <span className="font-bold text-xl bg-gradient-to-r from-blue-600 via-purple-500 to-orange-500 bg-clip-text text-transparent hidden md:inline">
+              SynergySphere
+            </span>
+          </Link>
+          
+          <nav className="hidden md:flex ml-6 space-x-4">
+            <Button variant="ghost" asChild>
+              <Link to="/">Dashboard</Link>
+            </Button>
+            <Button variant="ghost" asChild>
+              <Link to="/tasks">Tasks</Link>
+            </Button>
+          </nav>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleThemeToggle}
+            className="rounded-full"
+          >
+            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full relative">
+                <Bell className="h-5 w-5" />
+                <Badge className="absolute -top-1 -right-1 px-1 min-w-[1.25rem] h-5">3</Badge>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[300px]">
+              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <div className="max-h-[300px] overflow-auto">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <DropdownMenuItem key={i} className="cursor-pointer p-3">
+                    <div>
+                      <div className="font-medium text-sm">
+                        {i === 0 ? 'New task assigned to you' : i === 1 ? 'Project updated' : 'Comment on your task'}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">Just now</div>
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="flex items-center space-x-2 p-1">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={currentUser?.avatar} />
+                  <AvatarFallback>{currentUser?.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <span className="hidden md:flex items-center">
+                  <span className="mr-2">{currentUser?.name}</span>
+                  <ChevronDown className="h-4 w-4" />
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/settings" className="cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

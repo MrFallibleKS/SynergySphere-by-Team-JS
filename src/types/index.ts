@@ -32,6 +32,9 @@ export type Project = {
   id: string;
   name: string;
   description: string;
+  imageBanner?: string;
+  managerName?: string;
+  managerContact?: string;
   members: string[]; // User IDs
   tasks: string[]; // Task IDs
   createdAt: string;

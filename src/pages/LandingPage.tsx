@@ -13,17 +13,7 @@ const LandingPage: React.FC = () => {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
               <div className="w-10 h-10 mr-2">
-                <svg width="40" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="16" cy="16" r="16" fill="url(#gradient)" />
-                  <path d="M22 12L16 7L10 12L10 22L22 22L22 12Z" fill="white" fillOpacity="0.5" />
-                  <path d="M16 7L10 12L16 17L22 12L16 7Z" fill="white" />
-                  <defs>
-                    <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#4776E6" />
-                      <stop offset="1" stopColor="#8E54E9" />
-                    </linearGradient>
-                  </defs>
-                </svg>
+                <img src="/lovable-uploads/13d60c81-dde3-4f3d-a4ee-6c5bc6231383.png" alt="SynergySphere Logo" className="w-full h-full" />
               </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-500 to-orange-500 bg-clip-text text-transparent">
                 SynergySphere
@@ -36,10 +26,10 @@ const LandingPage: React.FC = () => {
               <a href="#faq" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition">FAQ</a>
             </div>
             <div className="flex items-center space-x-4">
-              <Link to="/">
+              <Link to="/login">
                 <Button variant="outline">Log In</Button>
               </Link>
-              <Link to="/">
+              <Link to="/register">
                 <Button>Sign Up</Button>
               </Link>
             </div>
@@ -58,11 +48,11 @@ const LandingPage: React.FC = () => {
                 </span>
               </h1>
               <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
-                SynergySphere is the intelligent backbone for teams, helping you stay organized,
+                SynergySphere is the ultimate collaboration tool, helping you stay organized,
                 communicate better, and make informed decisions without friction.
               </p>
               <div className="flex flex-col sm:flex-row justify-center md:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
-                <Link to="/">
+                <Link to="/register">
                   <Button size="lg" className="w-full sm:w-auto">Get Started Free</Button>
                 </Link>
                 <Link to="#features">
@@ -77,10 +67,9 @@ const LandingPage: React.FC = () => {
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur-lg opacity-30"></div>
                 <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700">
                   <img 
-                    src="/placeholder.svg" 
+                    src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1200&h=600&q=80" 
                     alt="SynergySphere Dashboard" 
                     className="w-full h-auto"
-                    style={{ minHeight: '300px' }}
                   />
                 </div>
               </div>
@@ -104,9 +93,9 @@ const LandingPage: React.FC = () => {
               <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
                 <LayoutGrid className="w-6 h-6 text-blue-600 dark:text-blue-300" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Task Management</h3>
+              <h3 className="text-xl font-bold mb-2">Project Management</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Create, assign, and track tasks with ease. Keep everything organized and on schedule.
+                Create, update, and track projects with ease. Add project details, images, and assign team members.
               </p>
             </div>
             
@@ -116,7 +105,7 @@ const LandingPage: React.FC = () => {
               </div>
               <h3 className="text-xl font-bold mb-2">Team Collaboration</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Work together seamlessly with real-time updates and project-specific communication.
+                Work together seamlessly with real-time updates and project-specific communication channels.
               </p>
             </div>
             
@@ -124,9 +113,9 @@ const LandingPage: React.FC = () => {
               <div className="bg-orange-100 dark:bg-orange-900 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
                 <Clock className="w-6 h-6 text-orange-600 dark:text-orange-300" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Time Tracking</h3>
+              <h3 className="text-xl font-bold mb-2">Task Management</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Monitor progress and ensure projects stay on schedule with built-in time tracking features.
+                Create, assign, and track tasks for each project. Set due dates and monitor progress in real-time.
               </p>
             </div>
             
@@ -134,72 +123,19 @@ const LandingPage: React.FC = () => {
               <div className="bg-green-100 dark:bg-green-900 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
                 <MessageSquare className="w-6 h-6 text-green-600 dark:text-green-300" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Integrated Communication</h3>
+              <h3 className="text-xl font-bold mb-2">Responsive Design</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Keep conversations organized and in context with project-specific communication channels.
+                Access your projects and tasks from any device with our fully responsive platform.
               </p>
             </div>
           </div>
           
           <div className="mt-12 text-center">
-            <Link to="/">
+            <Link to="/register">
               <Button size="lg">
-                See All Features <ArrowRight className="ml-2 h-4 w-4" />
+                Get Started Today <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section id="testimonials" className="py-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">What Our Users Say</h2>
-            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-              Teams of all sizes are using SynergySphere to transform how they work together.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-gray-300 dark:bg-gray-600 rounded-full mr-4"></div>
-                <div>
-                  <h4 className="font-bold">Sarah Johnson</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Product Manager, TechCorp</p>
-                </div>
-              </div>
-              <p className="text-gray-600 dark:text-gray-300">
-                "SynergySphere has completely transformed how our team communicates and collaborates. We're more efficient than ever before."
-              </p>
-            </div>
-            
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-gray-300 dark:bg-gray-600 rounded-full mr-4"></div>
-                <div>
-                  <h4 className="font-bold">Michael Chen</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">CTO, StartUp Inc</p>
-                </div>
-              </div>
-              <p className="text-gray-600 dark:text-gray-300">
-                "The platform's intuitive design made onboarding our team a breeze. Now we can focus on what matters most - building great products."
-              </p>
-            </div>
-            
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-gray-300 dark:bg-gray-600 rounded-full mr-4"></div>
-                <div>
-                  <h4 className="font-bold">Rebecca Torres</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Team Lead, CreativeAgency</p>
-                </div>
-              </div>
-              <p className="text-gray-600 dark:text-gray-300">
-                "SynergySphere's task management and communication tools have helped us deliver projects ahead of schedule consistently."
-              </p>
-            </div>
           </div>
         </div>
       </section>
@@ -212,11 +148,18 @@ const LandingPage: React.FC = () => {
             <p className="text-xl mb-8 max-w-2xl mx-auto">
               Join thousands of teams already using SynergySphere to collaborate better and deliver faster.
             </p>
-            <Link to="/">
-              <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100">
-                Get Started Free
-              </Button>
-            </Link>
+            <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+              <Link to="/register">
+                <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100">
+                  Create Free Account
+                </Button>
+              </Link>
+              <Link to="/login">
+                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+                  Login
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -228,32 +171,22 @@ const LandingPage: React.FC = () => {
             <div>
               <div className="flex items-center mb-4">
                 <div className="w-8 h-8 mr-2">
-                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="16" cy="16" r="16" fill="url(#gradient)" />
-                    <path d="M22 12L16 7L10 12L10 22L22 22L22 12Z" fill="white" fillOpacity="0.5" />
-                    <path d="M16 7L10 12L16 17L22 12L16 7Z" fill="white" />
-                    <defs>
-                      <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                        <stop stopColor="#4776E6" />
-                        <stop offset="1" stopColor="#8E54E9" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
+                  <img src="/lovable-uploads/13d60c81-dde3-4f3d-a4ee-6c5bc6231383.png" alt="SynergySphere Logo" className="w-full h-full" />
                 </div>
                 <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-500 to-orange-500 bg-clip-text text-transparent">
                   SynergySphere
                 </span>
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                The intelligent backbone for team collaboration.
+                The ultimate collaboration tool for teams of all sizes.
               </p>
             </div>
             
             <div>
               <h4 className="text-lg font-bold mb-4">Product</h4>
               <ul className="space-y-2">
-                <li><a href="#" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Features</a></li>
-                <li><a href="#" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Pricing</a></li>
+                <li><a href="#features" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Features</a></li>
+                <li><a href="#pricing" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Pricing</a></li>
                 <li><a href="#" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Security</a></li>
                 <li><a href="#" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Enterprise</a></li>
               </ul>
