@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useData } from '@/context/DataContext';
 import { Calendar, CheckCheck } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, differenceInDays } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,6 +13,7 @@ import {
   DialogContent,
 } from '@/components/ui/dialog';
 import TaskDetail from '@/components/TaskDetail';
+import TaskStatusLegend from '@/components/TaskStatusLegend';
 
 const Tasks: React.FC = () => {
   const { currentUser } = useAuth();
@@ -37,9 +38,17 @@ const Tasks: React.FC = () => {
     return format(date, 'MMM dd, yyyy');
   };
   
-  // Check if task is overdue
-  const isTaskOverdue = (dueDate: string, status: string) => {
-    return new Date(dueDate) < new Date() && status !== 'DONE';
+  // Check if task is overdue or close to deadline
+  const getTaskStatus = (dueDate: string, status: string) => {
+    if (status === 'DONE') return 'completed';
+    
+    const today = new Date();
+    const taskDate = new Date(dueDate);
+    const daysUntilDue = differenceInDays(taskDate, today);
+    
+    if (daysUntilDue < 0) return 'overdue';
+    if (daysUntilDue <= 3) return 'close-deadline';
+    return 'pending';
   };
   
   const handleDeleteTask = (taskId: string) => {
@@ -50,25 +59,27 @@ const Tasks: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto max-w-5xl">
+    <div className="container mx-auto max-w-5xl px-4 py-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold">My Tasks</h1>
         <p className="text-gray-500 mt-1">Manage and track all your tasks</p>
       </div>
       
-      <Tabs defaultValue="all">
-        <TabsList className="mb-6">
-          <TabsTrigger value="all">All Tasks ({userTasks.length})</TabsTrigger>
-          <TabsTrigger value="todo">To Do ({todoTasks.length})</TabsTrigger>
-          <TabsTrigger value="in-progress">In Progress ({inProgressTasks.length})</TabsTrigger>
-          <TabsTrigger value="completed">Completed ({completedTasks.length})</TabsTrigger>
+      <TaskStatusLegend />
+      
+      <Tabs defaultValue="all" className="mt-6">
+        <TabsList className="mb-6 w-full flex flex-wrap sm:flex-nowrap">
+          <TabsTrigger value="all" className="flex-1">All Tasks ({userTasks.length})</TabsTrigger>
+          <TabsTrigger value="todo" className="flex-1">To Do ({todoTasks.length})</TabsTrigger>
+          <TabsTrigger value="in-progress" className="flex-1">In Progress ({inProgressTasks.length})</TabsTrigger>
+          <TabsTrigger value="completed" className="flex-1">Completed ({completedTasks.length})</TabsTrigger>
         </TabsList>
         
         <TabsContent value="all">
           <TaskList 
             tasks={userTasks} 
             formatDate={formatDate} 
-            isTaskOverdue={isTaskOverdue}
+            getTaskStatus={getTaskStatus}
             getProjectById={getProjectById}
             onViewTask={setSelectedTaskId}
           />
@@ -78,7 +89,7 @@ const Tasks: React.FC = () => {
           <TaskList 
             tasks={todoTasks} 
             formatDate={formatDate} 
-            isTaskOverdue={isTaskOverdue}
+            getTaskStatus={getTaskStatus}
             getProjectById={getProjectById}
             onViewTask={setSelectedTaskId}
           />
@@ -88,7 +99,7 @@ const Tasks: React.FC = () => {
           <TaskList 
             tasks={inProgressTasks} 
             formatDate={formatDate} 
-            isTaskOverdue={isTaskOverdue}
+            getTaskStatus={getTaskStatus}
             getProjectById={getProjectById}
             onViewTask={setSelectedTaskId}
           />
@@ -98,7 +109,7 @@ const Tasks: React.FC = () => {
           <TaskList 
             tasks={completedTasks} 
             formatDate={formatDate} 
-            isTaskOverdue={isTaskOverdue}
+            getTaskStatus={getTaskStatus}
             getProjectById={getProjectById}
             onViewTask={setSelectedTaskId}
           />
@@ -124,7 +135,7 @@ const Tasks: React.FC = () => {
 interface TaskListProps {
   tasks: any[];
   formatDate: (date: string) => string;
-  isTaskOverdue: (dueDate: string, status: string) => boolean;
+  getTaskStatus: (dueDate: string, status: string) => string;
   getProjectById: (id: string) => any;
   onViewTask: (taskId: string) => void;
 }
@@ -132,13 +143,13 @@ interface TaskListProps {
 const TaskList: React.FC<TaskListProps> = ({ 
   tasks, 
   formatDate, 
-  isTaskOverdue, 
+  getTaskStatus, 
   getProjectById,
   onViewTask
 }) => {
   if (tasks.length === 0) {
     return (
-      <div className="text-center py-12 bg-gray-50 rounded-lg">
+      <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
         <p className="text-gray-500">No tasks found</p>
       </div>
     );
@@ -148,13 +159,16 @@ const TaskList: React.FC<TaskListProps> = ({
     <div className="space-y-4">
       {tasks.map((task) => {
         const project = getProjectById(task.projectId);
-        const overdue = isTaskOverdue(task.dueDate, task.status);
+        const status = getTaskStatus(task.dueDate, task.status);
         
         return (
           <Card 
             key={task.id}
             className={`cursor-pointer hover:shadow-md transition-shadow ${
-              overdue ? 'border-red-300' : ''
+              status === 'completed' ? 'border-green-300 bg-green-50 dark:bg-green-900/20' :
+              status === 'overdue' || status === 'close-deadline' ? 'border-red-300 bg-red-50 dark:bg-red-900/20' :
+              status === 'pending' ? 'border-amber-300 bg-amber-50 dark:bg-amber-900/20' :
+              ''
             }`}
             onClick={() => onViewTask(task.id)}
           >
@@ -193,9 +207,9 @@ const TaskList: React.FC<TaskListProps> = ({
                 <div className={`mt-3 md:mt-0 text-sm flex items-center ${
                   task.status === 'DONE' 
                     ? 'text-green-600' 
-                    : overdue 
+                    : status === 'close-deadline' || status === 'overdue'
                       ? 'text-red-600'
-                      : 'text-gray-500'
+                      : 'text-amber-600'
                 }`}>
                   {task.status === 'DONE' ? (
                     <div className="flex items-center">

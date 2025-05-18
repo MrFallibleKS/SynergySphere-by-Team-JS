@@ -21,6 +21,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AvailableProjects from './AvailableProjects';
+import TaskStatusLegend from './TaskStatusLegend';
 
 const Dashboard: React.FC = () => {
   const { currentUser } = useAuth();
@@ -88,12 +91,12 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       {/* Welcome Section */}
       <section className="mb-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
           <div>
-            <h1 className="text-4xl font-bold">Welcome, {currentUser?.name}</h1>
+            <h1 className="text-3xl md:text-4xl font-bold">Welcome, {currentUser?.name}</h1>
             <p className="text-gray-600 mt-1">Here's an overview of your tasks and projects</p>
           </div>
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -138,13 +141,15 @@ const Dashboard: React.FC = () => {
         </div>
       </section>
       
+      <TaskStatusLegend />
+      
       {/* Task Overview */}
       <section className="mb-8">
         <h2 className="text-2xl font-bold mb-4">To Do</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* To Do */}
           <Card className="border shadow-sm">
-            <CardHeader className="pb-2 bg-white">
+            <CardHeader className="pb-2 bg-white dark:bg-gray-800">
               <CardTitle className="text-xl">To Do</CardTitle>
             </CardHeader>
             <CardContent className="pt-4">
@@ -173,7 +178,7 @@ const Dashboard: React.FC = () => {
           
           {/* In Progress */}
           <Card className="border shadow-sm">
-            <CardHeader className="pb-2 bg-white">
+            <CardHeader className="pb-2 bg-white dark:bg-gray-800">
               <CardTitle className="text-xl">In Progress</CardTitle>
             </CardHeader>
             <CardContent className="pt-4">
@@ -202,7 +207,7 @@ const Dashboard: React.FC = () => {
           
           {/* Completed */}
           <Card className="border shadow-sm">
-            <CardHeader className="pb-2 bg-white">
+            <CardHeader className="pb-2 bg-white dark:bg-gray-800">
               <CardTitle className="text-xl">Completed</CardTitle>
             </CardHeader>
             <CardContent className="pt-4">
@@ -235,11 +240,11 @@ const Dashboard: React.FC = () => {
       <section className="mb-8">
         <h2 className="text-2xl font-bold mb-4">Attention Required</h2>
         {tasksDueSoon.length > 0 && (
-          <Card className="border shadow-sm mb-4 bg-amber-50">
-            <CardHeader className="pb-2 border-b border-amber-100">
+          <Card className="border shadow-sm mb-4 bg-amber-50 dark:bg-amber-900/20">
+            <CardHeader className="pb-2 border-b border-amber-100 dark:border-amber-800">
               <div className="flex justify-between items-center">
-                <CardTitle className="text-lg text-amber-800">Due Soon</CardTitle>
-                <div className="text-amber-600">
+                <CardTitle className="text-lg text-amber-800 dark:text-amber-300">Due Soon</CardTitle>
+                <div className="text-amber-600 dark:text-amber-400">
                   <Calendar className="h-5 w-5" />
                 </div>
               </div>
@@ -250,16 +255,16 @@ const Dashboard: React.FC = () => {
                   const project = getProjectById(task.projectId);
                   
                   return (
-                    <li key={task.id} className="p-2 border-b pb-3">
+                    <li key={task.id} className="p-2 border-b pb-3 dark:border-amber-800/30">
                       <Link to={`/project/${task.projectId}`} className="block">
                         <div className="flex justify-between">
                           <div>
                             <p className="font-medium">{task.title}</p>
-                            <div className="text-sm text-gray-700 mt-1">
+                            <div className="text-sm text-gray-700 dark:text-gray-300 mt-1">
                               {project ? project.name : 'Unknown project'}
                             </div>
                           </div>
-                          <div className="text-amber-800 font-medium">
+                          <div className="text-amber-800 dark:text-amber-300 font-medium">
                             {formatDate(task.dueDate)}
                           </div>
                         </div>
@@ -273,62 +278,84 @@ const Dashboard: React.FC = () => {
         )}
       </section>
       
-      {/* Your Projects Section */}
-      <section>
-        <h2 className="text-2xl font-bold mb-4">Your Projects</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {userProjects.length > 0 ? (
-            userProjects.map((project) => {
-              // Get project members
-              const members = project.members
-                .map(id => getUserById(id))
-                .filter(Boolean);
-              
-              // Get project tasks
-              const projectTasksCount = tasks.filter(task => task.projectId === project.id).length;
-              const completedTasksCount = tasks.filter(task => task.projectId === project.id && task.status === 'DONE').length;
-              
-              // Calculate completion percentage
-              const completionPercentage = projectTasksCount > 0
-                ? Math.round((completedTasksCount / projectTasksCount) * 100)
-                : 0;
-              
-              return (
-                <Card key={project.id} className="border shadow-sm">
-                  <CardHeader>
-                    <CardTitle>{project.name}</CardTitle>
-                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">{project.description}</p>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Progress</span>
-                          <span>{completionPercentage}%</span>
+      {/* Projects Section */}
+      <section className="mb-8">
+        <Tabs defaultValue="your-projects">
+          <TabsList className="mb-4">
+            <TabsTrigger value="your-projects">Your Projects</TabsTrigger>
+            <TabsTrigger value="available-projects">Available Projects</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="your-projects">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {userProjects.length > 0 ? (
+                userProjects.map((project) => {
+                  // Get project members
+                  const members = project.members
+                    .map(id => getUserById(id))
+                    .filter(Boolean);
+                  
+                  // Get project tasks
+                  const projectTasksCount = tasks.filter(task => task.projectId === project.id).length;
+                  const completedTasksCount = tasks.filter(task => task.projectId === project.id && task.status === 'DONE').length;
+                  
+                  // Calculate completion percentage
+                  const completionPercentage = projectTasksCount > 0
+                    ? Math.round((completedTasksCount / projectTasksCount) * 100)
+                    : 0;
+                  
+                  return (
+                    <Card key={project.id} className="border shadow-sm">
+                      <CardHeader>
+                        <CardTitle>{project.name}</CardTitle>
+                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">{project.description}</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div>
+                            <div className="flex justify-between text-sm mb-1">
+                              <span>Progress</span>
+                              <span>{completionPercentage}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                              <div 
+                                className="bg-indigo-600 h-2 rounded-full" 
+                                style={{ width: `${completionPercentage}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            className="w-full mt-2" 
+                            asChild
+                          >
+                            <Link to={`/project/${project.id}`}>
+                              View Project <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                          </Button>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-indigo-600 h-2 rounded-full" 
-                            style={{ width: `${completionPercentage}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })
-          ) : (
-            <div className="col-span-full border rounded-lg p-8 bg-gray-50 text-center">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No projects yet</h3>
-              <p className="text-gray-600 mb-4">Create your first project to get started</p>
-              <Button onClick={() => setIsOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Project
-              </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              ) : (
+                <div className="col-span-full border rounded-lg p-8 bg-gray-50 dark:bg-gray-800 text-center">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No projects yet</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">Create your first project to get started</p>
+                  <Button onClick={() => setIsOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Project
+                  </Button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </TabsContent>
+          
+          <TabsContent value="available-projects">
+            <h2 className="text-xl font-semibold mb-4">Join Available Projects</h2>
+            <AvailableProjects />
+          </TabsContent>
+        </Tabs>
       </section>
     </div>
   );

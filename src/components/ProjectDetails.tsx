@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { format } from 'date-fns';
+import { format, differenceInDays } from 'date-fns';
 import {
   Dialog,
   DialogContent,
@@ -50,6 +50,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
 import { Task, Status } from '@/types';
 import TaskDetail from './TaskDetail';
+import TaskStatusLegend from './TaskStatusLegend';
 
 const ProjectDetails: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -218,16 +219,32 @@ const ProjectDetails: React.FC = () => {
     }
   };
   
+  // Check if task is close to deadline
+  const getTaskStatus = (dueDate: string, status: string) => {
+    if (status === 'DONE') return 'completed';
+    
+    const today = new Date();
+    const taskDate = new Date(dueDate);
+    const daysUntilDue = differenceInDays(taskDate, today);
+    
+    if (daysUntilDue < 0) return 'overdue';
+    if (daysUntilDue <= 3) return 'close-deadline';
+    return 'pending';
+  };
+  
   // Render task card
   const renderTaskCard = (task: Task) => {
     const assignee = getUserById(task.assigneeId);
-    const isOverdue = new Date(task.dueDate) < new Date() && task.status !== 'DONE';
+    const status = getTaskStatus(task.dueDate, task.status);
     
     return (
       <Card 
         key={task.id} 
         className={`mb-3 cursor-pointer hover:shadow-md transition-shadow ${
-          isOverdue ? 'border-red-300' : ''
+          status === 'completed' ? 'border-green-300 bg-green-50 dark:bg-green-900/20' :
+          status === 'overdue' || status === 'close-deadline' ? 'border-red-300 bg-red-50 dark:bg-red-900/20' :
+          status === 'pending' ? 'border-amber-300 bg-amber-50 dark:bg-amber-900/20' :
+          ''
         }`}
         onClick={() => handleViewTask(task.id)}
       >
@@ -238,7 +255,7 @@ const ProjectDetails: React.FC = () => {
           <div className="space-y-2">
             <div className="flex items-center text-sm text-gray-500">
               <Calendar className="w-4 h-4 mr-1" />
-              <span className={isOverdue ? 'text-red-500 font-medium' : ''}>
+              <span className={status === 'overdue' || status === 'close-deadline' ? 'text-red-500 font-medium' : ''}>
                 {formatDate(task.dueDate)}
               </span>
             </div>
@@ -309,7 +326,7 @@ const ProjectDetails: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4 py-6">
       {/* Project Header */}
       <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
         <div>
@@ -390,14 +407,14 @@ const ProjectDetails: React.FC = () => {
 
       {/* Project Tabs */}
       <Tabs defaultValue="tasks" className="mt-6">
-        <TabsList>
-          <TabsTrigger value="tasks">Tasks</TabsTrigger>
-          <TabsTrigger value="members">Members</TabsTrigger>
+        <TabsList className="mb-6 w-full flex flex-wrap sm:flex-nowrap">
+          <TabsTrigger value="tasks" className="flex-1">Tasks</TabsTrigger>
+          <TabsTrigger value="members" className="flex-1">Members</TabsTrigger>
         </TabsList>
         
         {/* Tasks Tab */}
         <TabsContent value="tasks" className="mt-4">
-          <div className="mb-4 flex justify-between items-center">
+          <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 className="text-xl font-semibold">Project Tasks</h2>
             <Dialog open={isNewTaskOpen} onOpenChange={setIsNewTaskOpen}>
               <DialogTrigger asChild>
@@ -470,12 +487,14 @@ const ProjectDetails: React.FC = () => {
             </Dialog>
           </div>
           
+          <TaskStatusLegend />
+          
           {/* Task Kanban Board */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
             {/* To Do Column */}
             <div>
-              <div className="mb-3 bg-gray-100 p-3 rounded-md">
-                <h3 className="font-medium text-gray-700 flex items-center">
+              <div className="mb-3 bg-gray-100 dark:bg-gray-800 p-3 rounded-md">
+                <h3 className="font-medium text-gray-700 dark:text-gray-300 flex items-center">
                   To Do
                   <Badge variant="outline" className="ml-2">{todoTasks.length}</Badge>
                 </h3>
@@ -491,8 +510,8 @@ const ProjectDetails: React.FC = () => {
             
             {/* In Progress Column */}
             <div>
-              <div className="mb-3 bg-blue-50 p-3 rounded-md">
-                <h3 className="font-medium text-blue-700 flex items-center">
+              <div className="mb-3 bg-blue-50 dark:bg-blue-900/30 p-3 rounded-md">
+                <h3 className="font-medium text-blue-700 dark:text-blue-300 flex items-center">
                   In Progress
                   <Badge variant="secondary" className="ml-2">{inProgressTasks.length}</Badge>
                 </h3>
@@ -508,8 +527,8 @@ const ProjectDetails: React.FC = () => {
             
             {/* Done Column */}
             <div>
-              <div className="mb-3 bg-green-50 p-3 rounded-md">
-                <h3 className="font-medium text-green-700 flex items-center">
+              <div className="mb-3 bg-green-50 dark:bg-green-900/30 p-3 rounded-md">
+                <h3 className="font-medium text-green-700 dark:text-green-300 flex items-center">
                   Done
                   <Badge className="ml-2">{doneTasks.length}</Badge>
                 </h3>
@@ -527,7 +546,7 @@ const ProjectDetails: React.FC = () => {
         
         {/* Members Tab */}
         <TabsContent value="members" className="mt-4">
-          <div className="mb-4 flex justify-between items-center">
+          <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 className="text-xl font-semibold">Team Members</h2>
             <Dialog open={isAddMemberOpen} onOpenChange={setIsAddMemberOpen}>
               <DialogTrigger asChild>
