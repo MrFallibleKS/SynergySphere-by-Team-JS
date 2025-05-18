@@ -33,6 +33,7 @@ export type TaskFormData = {
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
   role: string;
   projectId?: string;
+  tags?: string[]; // Adding tags to tasks
 };
 
 export type Comment = {

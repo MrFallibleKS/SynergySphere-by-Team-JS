@@ -78,34 +78,14 @@ const Sidebar: React.FC = () => {
           {!isCollapsed && (
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="16" cy="16" r="16" fill="url(#gradient)" />
-                  <path d="M22 12L16 7L10 12L10 22L22 22L22 12Z" fill="white" fillOpacity="0.5" />
-                  <path d="M16 7L10 12L16 17L22 12L16 7Z" fill="white" />
-                  <defs>
-                    <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#4776E6" />
-                      <stop offset="1" stopColor="#8E54E9" />
-                    </linearGradient>
-                  </defs>
-                </svg>
+                <img src="/lovable-uploads/20798b3f-8f2f-4eee-acc7-fa3d47c76467.png" alt="SynergySphere Logo" className="h-8 w-auto" />
               </div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-500 to-orange-500 bg-clip-text text-transparent">SynergySphere</h1>
             </div>
           )}
           {isCollapsed && (
             <div className="w-8 h-8">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="16" cy="16" r="16" fill="url(#gradient)" />
-                <path d="M22 12L16 7L10 12L10 22L22 22L22 12Z" fill="white" fillOpacity="0.5" />
-                <path d="M16 7L10 12L16 17L22 12L16 7Z" fill="white" />
-                <defs>
-                  <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#4776E6" />
-                    <stop offset="1" stopColor="#8E54E9" />
-                  </linearGradient>
-                </defs>
-              </svg>
+              <img src="/lovable-uploads/20798b3f-8f2f-4eee-acc7-fa3d47c76467.png" alt="SynergySphere Logo" className="h-8 w-auto" />
             </div>
           )}
         </div>

@@ -29,6 +29,7 @@ import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 import { Badge } from "@/components/ui/badge";
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
+import SearchBar from './SearchBar';
 
 const Navbar: React.FC = () => {
   const { currentUser, logout, isAuthenticated } = useAuth();
@@ -58,7 +59,7 @@ const Navbar: React.FC = () => {
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
-              <img src="/lovable-uploads/13d60c81-dde3-4f3d-a4ee-6c5bc6231383.png" alt="SynergySphere Logo" className="h-8 w-auto mr-2" />
+              <img src="/lovable-uploads/20798b3f-8f2f-4eee-acc7-fa3d47c76467.png" alt="SynergySphere Logo" className="h-8 w-auto mr-2" />
               <span className="font-bold text-xl bg-gradient-to-r from-blue-600 via-purple-500 to-orange-500 bg-clip-text text-transparent hidden sm:inline">
                 SynergySphere
               </span>
@@ -122,7 +123,7 @@ const Navbar: React.FC = () => {
   // Show full navbar for authenticated users
   return (
     <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 sticky top-0 z-10">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+      <div className="container mx-auto px-4 py-3 flex flex-wrap items-center justify-between">
         <div className="flex items-center">
           <div className="flex md:hidden">
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
@@ -138,7 +139,7 @@ const Navbar: React.FC = () => {
               <SheetContent side="left" className="w-[250px] sm:w-[300px]">
                 <div className="flex flex-col h-full">
                   <Link to="/" className="flex items-center py-4">
-                    <img src="/lovable-uploads/13d60c81-dde3-4f3d-a4ee-6c5bc6231383.png" alt="SynergySphere Logo" className="h-8 w-auto mr-2" />
+                    <img src="/lovable-uploads/20798b3f-8f2f-4eee-acc7-fa3d47c76467.png" alt="SynergySphere Logo" className="h-8 w-auto mr-2" />
                     <span className="font-bold text-xl bg-gradient-to-r from-blue-600 via-purple-500 to-orange-500 bg-clip-text text-transparent">
                       SynergySphere
                     </span>
@@ -172,7 +173,7 @@ const Navbar: React.FC = () => {
           </div>
           
           <Link to="/" className="flex items-center">
-            <img src="/lovable-uploads/13d60c81-dde3-4f3d-a4ee-6c5bc6231383.png" alt="SynergySphere Logo" className="h-8 w-auto mr-2" />
+            <img src="/lovable-uploads/20798b3f-8f2f-4eee-acc7-fa3d47c76467.png" alt="SynergySphere Logo" className="h-8 w-auto mr-2" />
             <span className="font-bold text-xl bg-gradient-to-r from-blue-600 via-purple-500 to-orange-500 bg-clip-text text-transparent hidden md:inline">
               SynergySphere
             </span>
@@ -188,7 +189,11 @@ const Navbar: React.FC = () => {
           </nav>
         </div>
         
-        <div className="flex items-center space-x-2">
+        <div className="mx-auto md:mx-0 mt-2 md:mt-0 w-full md:w-auto order-3 md:order-2">
+          <SearchBar />
+        </div>
+        
+        <div className="flex items-center space-x-2 order-2 md:order-3">
           <Button
             variant="ghost"
             size="icon"
