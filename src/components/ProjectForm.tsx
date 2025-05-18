@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
-import { Project, Task, Status } from '@/types';
+import { Project, Task, Status, TaskFormData } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { X, Plus, Calendar, Flag } from 'lucide-react';
@@ -26,17 +25,6 @@ interface ProjectFormProps {
   isEditing?: boolean;
   users?: { id: string; name: string }[];
 }
-
-type TaskFormData = {
-  id?: string;
-  title: string;
-  description: string;
-  assigneeId: string;
-  dueDate: string;
-  status: Status;
-  priority: 'LOW' | 'MEDIUM' | 'HIGH';
-  role: string;
-};
 
 const ProjectForm: React.FC<ProjectFormProps> = ({
   onSubmit,
@@ -420,7 +408,8 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                   </Label>
                   <Select 
                     value={task.status} 
-                    onValueChange={(value) => updateTask(index, 'status', value as Status)}
+                    onValueChange={(value) => 
+                      updateTask(index, 'status', value as Status)}
                   >
                     <SelectTrigger>
                       <SelectValue />

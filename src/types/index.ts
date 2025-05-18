@@ -22,6 +22,19 @@ export type Task = {
   updatedAt: string;
 };
 
+// Adding this type for form handling to avoid requiring createdAt/updatedAt
+export type TaskFormData = {
+  id?: string;
+  title: string;
+  description: string;
+  assigneeId: string;
+  dueDate: string;
+  status: Status;
+  priority: 'LOW' | 'MEDIUM' | 'HIGH';
+  role: string;
+  projectId?: string;
+};
+
 export type Comment = {
   id: string;
   content: string;
@@ -40,7 +53,7 @@ export type Project = {
   tags?: string[];
   members: string[]; // User IDs
   tasks: string[]; // Task IDs
-  taskDetails?: Task[]; // Full task objects for form handling
+  taskDetails?: TaskFormData[]; // Changed from Task[] to TaskFormData[] for form handling
   createdAt: string;
   updatedAt: string;
 };
