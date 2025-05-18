@@ -4,6 +4,8 @@
 
 👉 **View the live app here**: [https://synergy-sphere-connect-45.lovable.app](https://synergy-sphere-connect-45.lovable.app)
 
+Video Link : https://drive.google.com/file/d/1kp_f8CN3Qxkewq3vITeddI0D-m88y3QM/view?usp=drive_link
+
 **SynergySphere** is a full-featured, mobile-friendly collaboration platform built to empower teams with streamlined communication, efficient project tracking, and intuitive task management — all in one place.
 
 Developed during a high-intensity hackathon by **Team JS** 🧠⚡
