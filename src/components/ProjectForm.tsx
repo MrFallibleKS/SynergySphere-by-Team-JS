@@ -1,18 +1,13 @@
-
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
-import { Project, User } from '@/types';
-import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/components/ui/use-toast';
-import { ChevronLeft, Calendar as CalendarIcon, Tags } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Calendar } from './ui/calendar';
 import { format } from 'date-fns';
+import { Project, User } from '@/types';
 import {
   Select,
   SelectContent,
@@ -25,39 +20,35 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { Calendar as CalendarIcon } from 'lucide-react';
 
 interface ProjectFormProps {
-  onSubmit: (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onSubmit: (project: Partial<Project>) => void;
   onCancel: () => void;
-  initialData?: Partial<Project>;
+  initialData?: Project;
   isEditing?: boolean;
-  users?: { id: string; name: string }[];
+  users: User[];
 }
 
 const ProjectForm: React.FC<ProjectFormProps> = ({
   onSubmit,
   onCancel,
-  initialData = {},
+  initialData,
   isEditing = false,
-  users = []
+  users
 }) => {
-  const [name, setName] = useState(initialData.name || '');
-  const [description, setDescription] = useState(initialData.description || '');
-  const [imageBanner, setImageBanner] = useState(initialData.imageBanner || '');
-  const [managerName, setManagerName] = useState(initialData.managerName || '');
-  const [managerContact, setManagerContact] = useState(initialData.managerContact || '');
-  const [tags, setTags] = useState<string[]>(initialData.tags || []);
-  const [tagInput, setTagInput] = useState('');
+  const [name, setName] = useState(initialData?.name || '');
+  const [description, setDescription] = useState(initialData?.description || '');
+  const [managerId, setManagerId] = useState(initialData?.managerId || '');
   const [deadline, setDeadline] = useState<Date | undefined>(
-    initialData.deadline ? new Date(initialData.deadline) : undefined
+    initialData?.deadline ? new Date(initialData.deadline) : undefined
   );
-  const [priority, setPriority] = useState(initialData.priority || 'MEDIUM');
+  const [priority, setPriority] = useState<'LOW' | 'MEDIUM' | 'HIGH'>(initialData?.priority || 'MEDIUM');
+  const [tags, setTags] = useState<string[]>(initialData?.tags || []);
+  const [tagInput, setTagInput] = useState('');
+  const [members, setMembers] = useState<string[]>(initialData?.members || []);
+  const [imageBanner, setImageBanner] = useState(initialData?.imageBanner || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [managerId, setManagerId] = useState(initialData.managerId || '');
-
-  const navigate = useNavigate();
-  const { currentUser } = useAuth();
-  const { toast } = useToast();
 
   const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTagInput(e.target.value);
@@ -90,38 +81,23 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     e.preventDefault();
     
     if (!name.trim()) {
-      toast({
-        title: "Error",
-        description: "Project name is required",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (!deadline) {
-      toast({
-        title: "Error",
-        description: "Project deadline is required",
-        variant: "destructive"
-      });
       return;
     }
     
     setIsSubmitting(true);
     
     const projectData = {
+      ...initialData,
       name,
       description,
-      imageBanner,
-      managerName,
-      managerContact,
-      tags,
-      members: initialData.members || (currentUser ? [currentUser.id] : []),
-      tasks: initialData.tasks || [],
-      taskDetails: initialData.taskDetails || [],
-      deadline: deadline.toISOString(),
+      managerId,
+      managerName: users.find(u => u.id === managerId)?.name || '',
+      managerContact: users.find(u => u.id === managerId)?.email || '',
+      deadline: deadline ? deadline.toISOString() : '',
       priority,
-      managerId
+      tags,
+      members,
+      imageBanner
     };
     
     onSubmit(projectData);
@@ -130,35 +106,33 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
 
   return (
     <Card className="p-6 w-full max-w-4xl mx-auto">
-      <div className="flex items-center mb-6">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="flex items-center mr-2"
-          onClick={() => navigate('/projects')}
-        >
-          <ChevronLeft size={16} className="mr-1" />
-          Back
-        </Button>
-        <h2 className="text-2xl font-semibold">
-          {isEditing ? 'Edit Project' : 'New Project'}
-        </h2>
-      </div>
-      
+      <h2 className="text-2xl font-semibold mb-6">{isEditing ? 'Edit Project' : 'New Project'}</h2>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <div>
-            <Label htmlFor="project-name" className="text-base">Project Name*</Label>
+            <Label htmlFor="project-name" className="text-base">Project Name</Label>
             <Input
               id="project-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter project name"
               className="mt-1"
-              required
             />
           </div>
-          
+
+          <div>
+            <Label htmlFor="project-description" className="text-base">Description</Label>
+            <Textarea
+              id="project-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe the project"
+              rows={4}
+              className="mt-1"
+            />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="project-manager" className="text-base">Project Manager</Label>
@@ -167,10 +141,9 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                 onValueChange={setManagerId}
               >
                 <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Select manager" />
+                  <SelectValue placeholder="Select project manager" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
                   {users.map(user => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.name}
@@ -179,11 +152,11 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div>
               <Label htmlFor="project-deadline" className="text-base flex items-center">
                 <CalendarIcon size={16} className="mr-2" />
-                Deadline*
+                Deadline
               </Label>
               <Popover>
                 <PopoverTrigger asChild>
@@ -206,12 +179,9 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
               </Popover>
             </div>
           </div>
-          
+
           <div>
-            <Label className="text-base mb-1 flex items-center">
-              <Tags size={16} className="mr-2" />
-              Tags
-            </Label>
+            <Label className="text-base mb-1">Tags</Label>
             <div className="flex gap-2 mb-2">
               <Input
                 value={tagInput}
@@ -245,7 +215,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
               </div>
             )}
           </div>
-          
+
           <div>
             <Label htmlFor="project-priority" className="text-base">Priority</Label>
             <RadioGroup 
@@ -254,52 +224,27 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
               className="flex space-x-4 mt-1"
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="LOW" id="r1" />
-                <Label htmlFor="r1" className="cursor-pointer">Low</Label>
+                <RadioGroupItem value="LOW" id="priority-low" />
+                <Label htmlFor="priority-low" className="cursor-pointer">Low</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="MEDIUM" id="r2" />
-                <Label htmlFor="r2" className="cursor-pointer">Medium</Label>
+                <RadioGroupItem value="MEDIUM" id="priority-medium" />
+                <Label htmlFor="priority-medium" className="cursor-pointer">Medium</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="HIGH" id="r3" />
-                <Label htmlFor="r3" className="cursor-pointer">High</Label>
+                <RadioGroupItem value="HIGH" id="priority-high" />
+                <Label htmlFor="priority-high" className="cursor-pointer">High</Label>
               </div>
             </RadioGroup>
           </div>
-          
+
           <div>
-            <Label htmlFor="project-image" className="text-base">Banner Image URL</Label>
+            <Label htmlFor="project-image-banner" className="text-base">Image Banner URL</Label>
             <Input
-              id="project-image"
+              id="project-image-banner"
               value={imageBanner}
               onChange={(e) => setImageBanner(e.target.value)}
-              placeholder="Enter banner image URL"
-              className="mt-1"
-            />
-            {imageBanner && (
-              <div className="mt-2 rounded-md overflow-hidden h-32 bg-gray-100 flex items-center justify-center">
-                <img 
-                  src={imageBanner} 
-                  alt="Banner Preview" 
-                  className="object-cover h-full w-full"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = 'https://via.placeholder.com/400x200?text=Invalid+Image+URL';
-                  }}
-                />
-              </div>
-            )}
-          </div>
-          
-          <div>
-            <Label htmlFor="project-description" className="text-base">Description</Label>
-            <Textarea
-              id="project-description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe the project"
-              rows={4}
+              placeholder="Enter image URL for the project banner"
               className="mt-1"
             />
           </div>
@@ -307,10 +252,10 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
         
         <div className="flex justify-end space-x-2 pt-4">
           <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-            Discard
+            Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : isEditing ? 'Update Project' : 'Save Project'}
+            {isSubmitting ? 'Saving...' : isEditing ? 'Update Project' : 'Create Project'}
           </Button>
         </div>
       </form>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from './ui/button';
@@ -53,7 +52,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
   const [date, setDate] = useState<Date | undefined>(
     initialData.dueDate ? new Date(initialData.dueDate) : undefined
   );
-  const [priority, setPriority] = useState(initialData.priority || 'MEDIUM');
+  const [priority, setPriority] = useState<'LOW' | 'MEDIUM' | 'HIGH'>(initialData.priority || 'MEDIUM');
   const [role, setRole] = useState(initialData.role || '');
   const [tags, setTags] = useState<string[]>(initialData.tags || []);
   const [tagInput, setTagInput] = useState('');
@@ -137,7 +136,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
       assigneeId,
       dueDate: date.toISOString(),
       status: initialData.status || 'TODO',
-      priority: priority as 'LOW' | 'MEDIUM' | 'HIGH',
+      priority,
       role,
       projectId,
       tags
