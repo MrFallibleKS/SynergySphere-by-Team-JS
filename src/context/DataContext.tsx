@@ -18,6 +18,8 @@ interface DataContextType {
   updateTask: (task: TaskFormData) => void;
   deleteTask: (taskId: string) => void;
   markNotificationAsRead: (notificationId: string) => void;
+  getTasksByAssignee: (userId: string) => TaskFormData[];
+  getProjectById: (projectId: string) => Project | undefined;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -195,6 +197,18 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
+  // Get all tasks assigned to a user across all projects
+  const getTasksByAssignee = (userId: string) => {
+    return projects
+      .flatMap(project => project.taskDetails || [])
+      .filter(task => task.assigneeId === userId);
+  };
+
+  // Get a project by its ID
+  const getProjectById = (projectId: string) => {
+    return projects.find(project => project.id === projectId);
+  };
+
   return (
     <DataContext.Provider
       value={{
@@ -207,7 +221,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         addTask,
         updateTask,
         deleteTask,
-        markNotificationAsRead
+        markNotificationAsRead,
+        getTasksByAssignee,
+        getProjectById
       }}
     >
       {children}
